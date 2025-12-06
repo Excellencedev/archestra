@@ -153,10 +153,10 @@ const openAiProxyRoutes: FastifyPluginAsyncZod = async (fastify) => {
     const openAiClient = config.benchmark.mockMode
       ? (new MockOpenAIClient() as unknown as OpenAIProvider)
       : new OpenAIProvider({
-          apiKey: openAiApiKey,
-          baseURL: config.llm.openai.baseUrl,
-          fetch: getObservableFetch("openai", resolvedAgent),
-        });
+        apiKey: openAiApiKey,
+        baseURL: config.llm.openai.baseUrl,
+        fetch: getObservableFetch("openai", resolvedAgent),
+      });
 
     try {
       // Check if current usage limits are already exceeded
@@ -259,51 +259,51 @@ const openAiProxyRoutes: FastifyPluginAsyncZod = async (fastify) => {
           resolvedAgent.considerContextUntrusted,
           stream
             ? () => {
-                // Send initial indicator when dual LLM starts (streaming only)
-                const startChunk = {
-                  id: "chatcmpl-sanitizing",
-                  object: "chat.completion.chunk" as const,
-                  created: Date.now() / 1000,
-                  model: model,
-                  choices: [
-                    {
-                      index: 0,
-                      delta: {
-                        role: "assistant" as const,
-                        content: "Analyzing with Dual LLM:\n\n",
-                      },
-                      finish_reason: null,
-                      logprobs: null,
+              // Send initial indicator when dual LLM starts (streaming only)
+              const startChunk = {
+                id: "chatcmpl-sanitizing",
+                object: "chat.completion.chunk" as const,
+                created: Date.now() / 1000,
+                model: model,
+                choices: [
+                  {
+                    index: 0,
+                    delta: {
+                      role: "assistant" as const,
+                      content: "Analyzing with Dual LLM:\n\n",
                     },
-                  ],
-                };
-                reply.raw.write(`data: ${JSON.stringify(startChunk)}\n\n`);
-              }
+                    finish_reason: null,
+                    logprobs: null,
+                  },
+                ],
+              };
+              reply.raw.write(`data: ${JSON.stringify(startChunk)}\n\n`);
+            }
             : undefined,
           stream
             ? (progress) => {
-                // Stream Q&A progress with options
-                const optionsText = progress.options
-                  .map((opt, idx) => `  ${idx}: ${opt}`)
-                  .join("\n");
-                const progressChunk = {
-                  id: "chatcmpl-sanitizing",
-                  object: "chat.completion.chunk" as const,
-                  created: Date.now() / 1000,
-                  model: model,
-                  choices: [
-                    {
-                      index: 0,
-                      delta: {
-                        content: `Question: ${progress.question}\nOptions:\n${optionsText}\nAnswer: ${progress.answer}\n\n`,
-                      },
-                      finish_reason: null,
-                      logprobs: null,
+              // Stream Q&A progress with options
+              const optionsText = progress.options
+                .map((opt, idx) => `  ${idx}: ${opt}`)
+                .join("\n");
+              const progressChunk = {
+                id: "chatcmpl-sanitizing",
+                object: "chat.completion.chunk" as const,
+                created: Date.now() / 1000,
+                model: model,
+                choices: [
+                  {
+                    index: 0,
+                    delta: {
+                      content: `Question: ${progress.question}\nOptions:\n${optionsText}\nAnswer: ${progress.answer}\n\n`,
                     },
-                  ],
-                };
-                reply.raw.write(`data: ${JSON.stringify(progressChunk)}\n\n`);
-              }
+                    finish_reason: null,
+                    logprobs: null,
+                  },
+                ],
+              };
+              reply.raw.write(`data: ${JSON.stringify(progressChunk)}\n\n`);
+            }
             : undefined,
         );
 
@@ -479,7 +479,7 @@ const openAiProxyRoutes: FastifyPluginAsyncZod = async (fastify) => {
                 } else {
                   return {
                     toolCallName: toolCall.custom.name,
-                    toolCallArgs: toolCall.custom.input,
+                    toolCallArgs: JSON.stringify(toolCall.custom.input),
                   };
                 }
               }),
@@ -757,7 +757,7 @@ const openAiProxyRoutes: FastifyPluginAsyncZod = async (fastify) => {
               } else {
                 return {
                   toolCallName: toolCall.custom.name,
-                  toolCallArgs: toolCall.custom.input,
+                  toolCallArgs: JSON.stringify(toolCall.custom.input),
                 };
               }
             }),
