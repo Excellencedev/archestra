@@ -672,6 +672,65 @@ const chatRoutes: FastifyPluginAsyncZod = async (fastify) => {
     },
   );
 
+  fastify.patch(
+    "/api/chat/messages/:id",
+    {
+      schema: {
+        operationId: RouteId.UpdateChatMessage,
+        description:
+          "Update a message content and optionally delete subsequent messages",
+        tags: ["Chat"],
+        params: z.object({ id: UuidIdSchema }),
+        body: z.object({
+          // Message content is dynamic
+          content: z.any(),
+          deleteSubsequent: z.boolean().default(false),
+        }),
+        response: constructResponseSchema(z.object({ success: z.boolean() })),
+      },
+    },
+    async (
+      {
+        params: { id },
+        body: { content, deleteSubsequent },
+        user,
+        organizationId,
+      },
+      reply,
+    ) => {
+      // 1. Find the message to get conversation ID
+      const message = await MessageModel.findById(id);
+
+      if (!message) {
+        throw new ApiError(404, "Message not found");
+      }
+
+      // 2. Verify user has access to the conversation
+      const conversation = await ConversationModel.findById(
+        message.conversationId,
+        user.id,
+        organizationId,
+      );
+
+      if (!conversation) {
+        throw new ApiError(404, "Conversation not found");
+      }
+
+      // 3. Update the message content
+      await MessageModel.update(id, content);
+
+      // 4. If requested, delete subsequent messages
+      if (deleteSubsequent) {
+        await MessageModel.deleteAfter(
+          message.conversationId,
+          message.createdAt,
+        );
+      }
+
+      return reply.send({ success: true });
+    },
+  );
+
   fastify.post(
     "/api/chat/conversations/:id/generate-title",
     {

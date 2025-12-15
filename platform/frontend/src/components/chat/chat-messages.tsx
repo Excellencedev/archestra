@@ -1,5 +1,6 @@
 import type { UIMessage } from "@ai-sdk/react";
 import type { ChatStatus, DynamicToolUIPart, ToolUIPart } from "ai";
+import { Check, Pencil, X } from "lucide-react";
 import Image from "next/image";
 import { Fragment, useEffect, useRef, useState } from "react";
 import {
@@ -21,11 +22,17 @@ import {
   ToolInput,
   ToolOutput,
 } from "@/components/ai-elements/tool";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ChatMessagesProps {
   messages: UIMessage[];
   hideToolCalls?: boolean;
   status: ChatStatus;
+  setMessages?: (messages: UIMessage[]) => void;
+  // biome-ignore lint/suspicious/noExplicitAny: Message content is dynamic
+  sendMessage?: (message: any) => void;
+  reload?: () => Promise<string | null | undefined>;
 }
 
 // Type guards for tool parts
@@ -52,8 +59,108 @@ export function ChatMessages({
   messages,
   hideToolCalls = false,
   status,
+  setMessages,
+  reload,
 }: ChatMessagesProps) {
   const isStreamingStalled = useStreamingStallDetection(messages, status);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleStartEdit = (message: UIMessage, content: string) => {
+    setEditingMessageId(message.id);
+    setEditedContent(content);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditedContent("");
+    setIsSaving(false);
+  };
+
+  const handleSaveEdit = async (message: UIMessage) => {
+    // Check if content matches by looking at parts since UIMessage typing might not expose content directly
+    const currentContent = message.parts
+      .filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join("");
+    if (!editedContent.trim() || editedContent === currentContent) {
+      handleCancelEdit();
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const isUserMessage = message.role === "user";
+
+      // 1. Call API to update message
+      const response = await fetch(`/api/chat/messages/${message.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: editedContent,
+          deleteSubsequent: isUserMessage, // Cascade delete for user messages
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update message");
+      }
+
+      // 2. Update local state
+      if (setMessages) {
+        if (isUserMessage) {
+          // For User messages: Truncate history and Regenerate
+          const messageIndex = messages.findIndex((m) => m.id === message.id);
+          if (messageIndex !== -1) {
+            // Keep messages UP TO the edited message (exclusive)
+            // The edited message itself needs to be replaced/re-added with new content
+            const keptMessages = messages.slice(0, messageIndex);
+
+            // Update the history directly
+            const updatedMessage = {
+              ...message,
+              content: editedContent,
+              parts: message.parts.map((p) =>
+                p.type === "text" ? { ...p, text: editedContent } : p,
+              ),
+            };
+
+            // Set messages to [previous..., updatedMessage]
+            // This puts the conversation in the state "User just sent this message"
+            setMessages([...keptMessages, updatedMessage]);
+
+            // Trigger regeneration
+            if (reload) {
+              // reload() will re-send the request based on the current messages.
+              // Since the last message is now the User message, it should generate a response.
+              await reload();
+            }
+          }
+        } else {
+          // For Assistant messages: Just update in place
+          const updatedMessages = messages.map((m) => {
+            if (m.id === message.id) {
+              return {
+                ...m,
+                content: editedContent,
+                parts: m.parts.map((p) =>
+                  p.type === "text" ? { ...p, text: editedContent } : p,
+                ),
+              };
+            }
+            return m;
+          });
+          setMessages(updatedMessages as UIMessage[]);
+        }
+      }
+
+      handleCancelEdit();
+    } catch (error) {
+      console.error("Failed to edit message:", error);
+      setIsSaving(false);
+    }
+  };
 
   if (messages.length === 0) {
     return (
@@ -97,23 +204,79 @@ export function ChatMessages({
                 }
 
                 switch (part.type) {
-                  case "text":
+                  case "text": {
+                    const isEditing = editingMessageId === message.id;
+                    const canEdit =
+                      setMessages &&
+                      (message.role === "user" || message.role === "assistant");
+
                     return (
                       <Fragment key={`${message.id}-${i}`}>
-                        <Message from={message.role}>
-                          <MessageContent>
-                            {message.role === "system" && (
+                        <Message from={message.role} className="relative group">
+                          {/* Edit Button */}
+                          {canEdit && !isEditing && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleStartEdit(message, part.text)
+                              }
+                              className="absolute top-2 -right-10 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 text-muted-foreground hover:text-foreground"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+
+                          <MessageContent
+                            className={isEditing ? "w-full max-w-full" : ""}
+                          >
+                            {message.role === "system" && !isEditing && (
                               <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                                 System Prompt
                               </div>
                             )}
-                            <Response>{part.text}</Response>
+
+                            {isEditing ? (
+                              <div className="flex flex-col gap-2 w-full min-w-[300px]">
+                                <Textarea
+                                  value={editedContent}
+                                  onChange={(e) =>
+                                    setEditedContent(e.target.value)
+                                  }
+                                  className="min-h-[100px] bg-background/50"
+                                  placeholder="Edit message..."
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleCancelEdit}
+                                    disabled={isSaving}
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveEdit(message)}
+                                    disabled={isSaving}
+                                  >
+                                    <Check className="h-4 w-4 mr-1" />
+                                    Save
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <Response>{part.text}</Response>
+                            )}
                           </MessageContent>
                         </Message>
                       </Fragment>
                     );
+                  }
 
                   case "reasoning":
+                    // ... (same as before)
                     return (
                       <Reasoning key={`${message.id}-${i}`} className="w-full">
                         <ReasoningTrigger />

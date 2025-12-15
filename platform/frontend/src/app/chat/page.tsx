@@ -544,6 +544,9 @@ export default function ChatPage() {
               messages={messages}
               hideToolCalls={hideToolCalls}
               status={status}
+              setMessages={setMessages}
+              sendMessage={sendMessage}
+              reload={chatSession?.reload}
             />
           </div>
 

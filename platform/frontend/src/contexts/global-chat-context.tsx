@@ -40,6 +40,7 @@ interface ChatSession {
   setPendingCustomServerToolCall: (
     value: { toolCallId: string; toolName: string } | null,
   ) => void;
+  reload: () => Promise<string | null | undefined>;
 }
 
 interface ChatContextValue {
@@ -202,6 +203,7 @@ function ChatSessionHook({
     stop,
     error,
     addToolResult,
+    reload,
   } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
@@ -219,14 +221,15 @@ function ChatSessionHook({
       // Attempt to generate title after first assistant response
       // This will be checked when messages update in the effect below
     },
-    onError: (chatError) => {
+    onError: (chatError: Error) => {
       console.error("[ChatSession] Error occurred:", {
         conversationId,
         error: chatError,
         message: chatError.message,
       });
     },
-    onToolCall: ({ toolCall }) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Tool call structure is dynamic
+    onToolCall: ({ toolCall }: { toolCall: any }) => {
       if (
         toolCall.toolName ===
         TOOL_CREATE_MCP_SERVER_INSTALLATION_REQUEST_FULL_NAME
@@ -234,7 +237,8 @@ function ChatSessionHook({
         setPendingCustomServerToolCall(toolCall);
       }
     },
-  } as Parameters<typeof useChat>[0]);
+    // biome-ignore lint/suspicious/noExplicitAny: Casting to any to access reload which is not in the type definition yet
+  }) as any;
 
   // Auto-generate title after first assistant response
   useEffect(() => {
@@ -247,8 +251,10 @@ function ChatSessionHook({
     }
 
     // Check if we have at least one user message and one assistant message
-    const userMessages = messages.filter((m) => m.role === "user");
-    const assistantMessages = messages.filter((m) => m.role === "assistant");
+    const userMessages = messages.filter((m: UIMessage) => m.role === "user");
+    const assistantMessages = messages.filter(
+      (m: UIMessage) => m.role === "assistant",
+    );
 
     // Only generate title after first exchange (1 user + 1 assistant message)
     // and when status is ready (not still streaming)
@@ -259,7 +265,8 @@ function ChatSessionHook({
     ) {
       // Check if assistant message has actual text content (not just tool calls)
       const assistantHasText = assistantMessages[0].parts.some(
-        (part) => part.type === "text" && "text" in part && part.text,
+        // biome-ignore lint/suspicious/noExplicitAny: Part structure is dynamic
+        (part: any) => part.type === "text" && "text" in part && part.text,
       );
 
       if (assistantHasText) {
@@ -283,6 +290,7 @@ function ChatSessionHook({
       lastAccessTime: Date.now(),
       pendingCustomServerToolCall,
       setPendingCustomServerToolCall,
+      reload,
     };
 
     sessionsRef.current.set(conversationId, session);
@@ -302,6 +310,7 @@ function ChatSessionHook({
     sessionsRef,
     scheduleCleanup,
     notifySessionUpdate,
+    reload,
   ]);
 
   return null;

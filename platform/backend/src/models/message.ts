@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 import db, { schema } from "@/database";
 import type { InsertMessage, Message } from "@/types";
 
@@ -40,6 +40,36 @@ class MessageModel {
     await db
       .delete(schema.messagesTable)
       .where(eq(schema.messagesTable.conversationId, conversationId));
+  }
+
+  static async deleteAfter(conversationId: string, date: Date): Promise<void> {
+    await db
+      .delete(schema.messagesTable)
+      .where(
+        and(
+          eq(schema.messagesTable.conversationId, conversationId),
+          gt(schema.messagesTable.createdAt, date),
+        ),
+      );
+  }
+
+  static async findById(id: string): Promise<Message | undefined> {
+    const [message] = await db
+      .select()
+      .from(schema.messagesTable)
+      .where(eq(schema.messagesTable.id, id));
+    return message;
+  }
+
+  // biome-ignore lint/suspicious/noExplicitAny: Content is dynamic json
+  static async update(id: string, content: any): Promise<Message | undefined> {
+    const [message] = await db
+      .update(schema.messagesTable)
+      .set({ content })
+      .where(eq(schema.messagesTable.id, id))
+      .returning();
+
+    return message;
   }
 }
 
