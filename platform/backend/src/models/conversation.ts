@@ -68,7 +68,12 @@ class ConversationModel {
 
       const conversation = conversationMap.get(conversationId);
       if (conversation && row?.message?.content) {
-        conversation.messages.push(row.message.content);
+        // Map the database UUID to the UIMessage's id field
+        const messageContent = {
+          ...row.message.content,
+          id: row.message.id,
+        };
+        conversation.messages.push(messageContent);
       }
     }
 
@@ -115,7 +120,12 @@ class ConversationModel {
 
     for (const row of rows) {
       if (row.message?.content) {
-        messages.push(row.message.content);
+        // Map the database UUID to the UIMessage's id field
+        const messageContent = {
+          ...row.message.content,
+          id: row.message.id,
+        };
+        messages.push(messageContent);
       }
     }
 
