@@ -33,6 +33,7 @@ interface ChatMessagesProps {
   // biome-ignore lint/suspicious/noExplicitAny: Message content is dynamic
   sendMessage?: (message: any) => void;
   reload?: () => Promise<string | null | undefined>;
+  isLoadingConversation?: boolean;
 }
 
 // Type guards for tool parts
@@ -61,6 +62,7 @@ export function ChatMessages({
   status,
   setMessages,
   reload,
+  isLoadingConversation = false,
 }: ChatMessagesProps) {
   const isStreamingStalled = useStreamingStallDetection(messages, status);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -163,6 +165,11 @@ export function ChatMessages({
   };
 
   if (messages.length === 0) {
+    // Don't show "start conversation" message while loading - prevents flash of empty state
+    if (isLoadingConversation) {
+      return null;
+    }
+
     return (
       <div className="flex-1 flex h-full items-center justify-center text-center text-muted-foreground">
         <p className="text-sm">Start a conversation by sending a message</p>
@@ -349,16 +356,16 @@ export function ChatMessages({
           ))}
           {(status === "submitted" ||
             (status === "streaming" && isStreamingStalled)) && (
-            <Message from="assistant">
-              <Image
-                src={"/logo.png"}
-                alt="Loading logo"
-                width={40}
-                height={40}
-                className="object-contain h-8 w-auto animate-[bounce_700ms_ease_200ms_infinite]"
-              />
-            </Message>
-          )}
+              <Message from="assistant">
+                <Image
+                  src={"/logo.png"}
+                  alt="Loading logo"
+                  width={40}
+                  height={40}
+                  className="object-contain h-8 w-auto animate-[bounce_700ms_ease_200ms_infinite]"
+                />
+              </Message>
+            )}
         </div>
       </ConversationContent>
       <ConversationScrollButton />
@@ -424,8 +431,8 @@ function MessageTool({
   const hasInput = part.input && Object.keys(part.input).length > 0;
   const hasContent = Boolean(
     hasInput ||
-      (toolResultPart && Boolean(toolResultPart.output)) ||
-      (!toolResultPart && Boolean(part.output)),
+    (toolResultPart && Boolean(toolResultPart.output)) ||
+    (!toolResultPart && Boolean(part.output)),
   );
 
   return (
