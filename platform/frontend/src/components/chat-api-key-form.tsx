@@ -90,6 +90,14 @@ const PROVIDER_CONFIG: Record<
     consoleUrl: "https://aistudio.google.com/app/apikey",
     consoleName: "Google AI Studio",
   },
+  "z-ai": {
+    name: "Zhipu AI",
+    icon: "/icons/z-ai.png",
+    placeholder: "your-zhipu-api-key",
+    enabled: true,
+    consoleUrl: "https://open.bigmodel.cn/usercenter/apikeys",
+    consoleName: "Zhipu AI Platform",
+  },
 } as const;
 
 export { PROVIDER_CONFIG };

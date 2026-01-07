@@ -37,6 +37,10 @@ export function detectProviderFromModel(model: string): SupportedChatProvider {
     return "openai";
   }
 
+  if (lowerModel.includes("glm")) {
+    return "z-ai";
+  }
+
   // Default to anthropic for backwards compatibility
   return "anthropic";
 }
@@ -75,7 +79,8 @@ export async function resolveProviderApiKey(params: {
       secret?.secret?.apiKey ??
       secret?.secret?.anthropicApiKey ??
       secret?.secret?.geminiApiKey ??
-      secret?.secret?.openaiApiKey;
+      secret?.secret?.openaiApiKey ??
+      secret?.secret?.zAiApiKey;
     if (secretValue) {
       providerApiKey = secretValue as string;
       apiKeySource = resolvedApiKey.scope;
@@ -92,6 +97,9 @@ export async function resolveProviderApiKey(params: {
       apiKeySource = "environment";
     } else if (provider === "gemini" && config.chat.gemini.apiKey) {
       providerApiKey = config.chat.gemini.apiKey;
+      apiKeySource = "environment";
+    } else if (provider === "z-ai" && config.chat["z-ai"].apiKey) {
+      providerApiKey = config.chat["z-ai"].apiKey;
       apiKeySource = "environment";
     }
   }
@@ -168,6 +176,16 @@ export function createLLMModel(params: {
     });
     // Use .chat() to force Chat Completions API (not Responses API)
     // so our proxy's tool policy evaluation is applied
+    return client.chat(modelName);
+  }
+
+  if (provider === "z-ai") {
+    // URL format: /v1/z-ai/:agentId (SDK appends /chat/completions)
+    const client = createOpenAI({
+      apiKey,
+      baseURL: `http://localhost:${config.api.port}/v1/z-ai/${agentId}`,
+      headers,
+    });
     return client.chat(modelName);
   }
 

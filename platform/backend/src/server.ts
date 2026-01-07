@@ -44,6 +44,7 @@ import {
   Gemini,
   OpenAi,
   WebSocketMessageSchema,
+  ZAi,
 } from "@/types";
 import websocketService from "@/websocket";
 import * as routes from "./routes";
@@ -90,6 +91,12 @@ export function registerOpenApiSchemas() {
   });
   z.globalRegistry.add(Anthropic.API.MessagesResponseSchema, {
     id: "AnthropicMessagesResponse",
+  });
+  z.globalRegistry.add(ZAi.API.ChatCompletionRequestSchema, {
+    id: "ZAiChatCompletionRequest",
+  });
+  z.globalRegistry.add(ZAi.API.ChatCompletionResponseSchema, {
+    id: "ZAiChatCompletionResponse",
   });
   z.globalRegistry.add(WebSocketMessageSchema, {
     id: "WebSocketMessage",

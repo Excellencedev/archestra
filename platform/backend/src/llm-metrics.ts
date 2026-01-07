@@ -429,7 +429,7 @@ export function getObservableFetch(
         if (!data.usage) {
           return response;
         }
-        if (provider === "openai") {
+        if (provider === "openai" || provider === "z-ai") {
           const { input, output } = utils.adapters.openai.getUsageTokens(
             data.usage,
           );

@@ -131,6 +131,45 @@ async function fetchOpenAiModels(apiKey: string): Promise<ModelInfo[]> {
 }
 
 /**
+ * Fetch models from Zhipu AI API (OpenAI compatible)
+ */
+async function fetchZAiModels(apiKey: string): Promise<ModelInfo[]> {
+  const baseUrl = config.chat["z-ai"].baseUrl;
+  const url = `${baseUrl}/models`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error(
+      { status: response.status, error: errorText },
+      "Failed to fetch Zhipu AI models",
+    );
+    throw new Error(`Failed to fetch Zhipu AI models: ${response.status}`);
+  }
+
+  const data = (await response.json()) as {
+    data: Array<{
+      id: string;
+      created?: number;
+    }>;
+  };
+
+  return data.data.map((model) => ({
+    id: model.id,
+    displayName: model.id,
+    provider: "z-ai" as const,
+    createdAt: model.created
+      ? new Date(model.created * 1000).toISOString()
+      : undefined,
+  }));
+}
+
+/**
  * Fetch models from Gemini API
  */
 async function fetchGeminiModels(apiKey: string): Promise<ModelInfo[]> {
@@ -212,6 +251,8 @@ async function getProviderApiKey({
       return config.chat.openai.apiKey || null;
     case "gemini":
       return config.chat.gemini.apiKey || null;
+    case "z-ai":
+      return config.chat["z-ai"].apiKey || null;
     default:
       return null;
   }
@@ -225,6 +266,7 @@ const modelFetchers: Record<
   anthropic: fetchAnthropicModels,
   openai: fetchOpenAiModels,
   gemini: fetchGeminiModels,
+  "z-ai": fetchZAiModels,
 };
 
 /**
@@ -275,9 +317,10 @@ async function fetchModelsForProvider({
 
   try {
     let models: ModelInfo[] = [];
-    if (["anthropic", "openai"].includes(provider)) {
+    if (["anthropic", "openai", "z-ai"].includes(provider)) {
       if (apiKey) {
-        models = await modelFetchers[provider](apiKey);
+        models =
+          await modelFetchers[provider as keyof typeof modelFetchers](apiKey);
       }
     } else if (provider === "gemini") {
       if (!apiKey) {

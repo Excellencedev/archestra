@@ -13,3 +13,5 @@
 *.log
 
 platform/CLAUDE_LOCAL.md
+config.bat
+node_modules

@@ -261,6 +261,10 @@ export default {
           process.env.ARCHESTRA_GEMINI_VERTEX_AI_CREDENTIALS_FILE || "",
       },
     },
+    "z-ai": {
+      baseUrl:
+        process.env.ARCHESTRA_Z_AI_BASE_URL || "https://api.z.ai/api/paas/v4",
+    },
   },
   chat: {
     openai: {
@@ -280,6 +284,12 @@ export default {
       baseUrl:
         process.env.ARCHESTRA_CHAT_GEMINI_BASE_URL ||
         "https://generativelanguage.googleapis.com",
+    },
+    "z-ai": {
+      apiKey: process.env.ARCHESTRA_CHAT_Z_AI_API_KEY || "",
+      baseUrl:
+        process.env.ARCHESTRA_CHAT_Z_AI_BASE_URL ||
+        "https://api.z.ai/api/paas/v4",
     },
     mcp: {
       remoteServerUrl: process.env.ARCHESTRA_CHAT_MCP_SERVER_URL || "",
