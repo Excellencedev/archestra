@@ -126,3 +126,21 @@ With this configuration, Application Default Credentials (ADC) will automaticall
 
 For non-GKE environments or when Workload Identity isn't available, set `ARCHESTRA_GEMINI_VERTEX_AI_CREDENTIALS_FILE` to the path of a service account JSON key file.
 
+## Zhipu AI (Z.ai)
+
+Archestra supports Zhipu AI through its OpenAI-compatible API.
+
+### Supported Zhipu AI APIs
+
+- **Chat Completions API** (`/chat/completions`)
+
+### Zhipu AI Connection Details
+
+- **Base URL**: `http://localhost:9000/v1/z-ai/{agent-id}`
+- **Authentication**: Pass your Zhipu AI API key in the `Authorization` header as `Bearer <your-api-key>`
+
+### Important Notes
+
+- **Model Compatibility**: Designed for GLM series models (e.g., `glm-4`).
+- **OpenAI SDK**: You can use the OpenAI SDK by configuring the `baseURL` to the Archestra proxy endpoint.
+

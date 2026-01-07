@@ -119,6 +119,18 @@ export class OpenAiDualLlmClient implements DualLlmClient {
 }
 
 /**
+ * Zhipu AI implementation of DualLlmClient (OpenAI compatible)
+ */
+export class ZAiDualLlmClient extends OpenAiDualLlmClient {
+  constructor(apiKey: string, model = "glm-4") {
+    super(apiKey, model);
+    logger.debug({ model }, "[dualLlmClient] Zhipu AI: initializing client");
+    // @ts-expect-error - accessing private field for base URL override
+    this.client.baseURL = config.llm["z-ai"].baseUrl;
+  }
+}
+
+/**
  * Anthropic implementation of DualLlmClient
  */
 export class AnthropicDualLlmClient implements DualLlmClient {
@@ -359,6 +371,11 @@ export function createDualLlmClient(
     case "gemini":
       // Gemini supports Vertex AI mode where apiKey may be undefined
       return new GeminiDualLlmClient(apiKey);
+    case "z-ai":
+      if (!apiKey) {
+        throw new Error("API key required for Zhipu AI dual LLM");
+      }
+      return new ZAiDualLlmClient(apiKey);
     default:
       logger.debug(
         { provider },
