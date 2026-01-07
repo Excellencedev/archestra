@@ -9,6 +9,7 @@ import type {
   InteractionUtils,
 } from "./llmProviders/common";
 import GeminiGenerateContentInteraction from "./llmProviders/gemini";
+import MistralChatCompletionInteraction from "./llmProviders/mistral";
 import OllamaChatCompletionInteraction from "./llmProviders/ollama";
 import OpenAiChatCompletionInteraction from "./llmProviders/openai";
 import VllmChatCompletionInteraction from "./llmProviders/vllm";
@@ -59,8 +60,8 @@ export function calculateCostSavings(
   // Calculate tokens saved from TOON compression
   const toonTokensSaved =
     input.toonTokensBefore &&
-    input.toonTokensAfter &&
-    input.toonTokensBefore > input.toonTokensAfter
+      input.toonTokensAfter &&
+      input.toonTokensBefore > input.toonTokensAfter
       ? input.toonTokensBefore - input.toonTokensAfter
       : null;
 
@@ -134,85 +135,88 @@ export class DynamicInteraction implements InteractionUtils {
       return new CohereChatInteraction(interaction);
     } else if (type === "gemini:generateContent") {
       return new GeminiGenerateContentInteraction(interaction);
+    } else if (type === "mistral:chatCompletions") {
+      return new MistralChatCompletionInteraction(interaction);
     }
+  }
     throw new Error(`Unsupported interaction type: ${type}`);
   }
 
-  isLastMessageToolCall(): boolean {
-    return this.interactionClass.isLastMessageToolCall();
+isLastMessageToolCall(): boolean {
+  return this.interactionClass.isLastMessageToolCall();
+}
+
+getLastToolCallId(): string | null {
+  return this.interactionClass.getLastToolCallId();
+}
+
+getToolNamesRefused(): string[] {
+  return this.interactionClass.getToolNamesRefused();
+}
+
+getToolNamesRequested(): string[] {
+  return this.interactionClass.getToolNamesRequested();
+}
+
+getToolNamesUsed(): string[] {
+  return this.interactionClass.getToolNamesUsed();
+}
+
+getToolRefusedCount(): number {
+  return this.interactionClass.getToolRefusedCount();
+}
+
+getLastUserMessage(): string {
+  return this.interactionClass.getLastUserMessage();
+}
+
+getLastAssistantResponse(): string {
+  return this.interactionClass.getLastAssistantResponse();
+}
+
+/**
+ * Map request messages, combining tool calls with their results and dual LLM analysis
+ */
+mapToUiMessages(dualLlmResults ?: DualLlmResult[]): PartialUIMessage[] {
+  return this.interactionClass.mapToUiMessages(dualLlmResults);
+}
+
+/**
+ * Get TOON compression savings from database-stored token counts
+ * Returns null if no TOON compression data available
+ */
+getToonSavings(): {
+  originalSize: number;
+  compressedSize: number;
+  savedCharacters: number;
+  percentageSaved: number;
+} | null {
+  const toonTokensBefore = this.interaction.toonTokensBefore;
+  const toonTokensAfter = this.interaction.toonTokensAfter;
+
+  // Return null if no TOON compression data
+  if (
+    toonTokensBefore === null ||
+    toonTokensAfter === null ||
+    toonTokensBefore === undefined ||
+    toonTokensAfter === undefined
+  ) {
+    return null;
   }
 
-  getLastToolCallId(): string | null {
-    return this.interactionClass.getLastToolCallId();
+  // Only show savings if there was actual compression
+  if (toonTokensAfter >= toonTokensBefore || toonTokensBefore === 0) {
+    return null;
   }
 
-  getToolNamesRefused(): string[] {
-    return this.interactionClass.getToolNamesRefused();
-  }
+  const savedCharacters = toonTokensBefore - toonTokensAfter;
+  const percentageSaved = (savedCharacters / toonTokensBefore) * 100;
 
-  getToolNamesRequested(): string[] {
-    return this.interactionClass.getToolNamesRequested();
-  }
-
-  getToolNamesUsed(): string[] {
-    return this.interactionClass.getToolNamesUsed();
-  }
-
-  getToolRefusedCount(): number {
-    return this.interactionClass.getToolRefusedCount();
-  }
-
-  getLastUserMessage(): string {
-    return this.interactionClass.getLastUserMessage();
-  }
-
-  getLastAssistantResponse(): string {
-    return this.interactionClass.getLastAssistantResponse();
-  }
-
-  /**
-   * Map request messages, combining tool calls with their results and dual LLM analysis
-   */
-  mapToUiMessages(dualLlmResults?: DualLlmResult[]): PartialUIMessage[] {
-    return this.interactionClass.mapToUiMessages(dualLlmResults);
-  }
-
-  /**
-   * Get TOON compression savings from database-stored token counts
-   * Returns null if no TOON compression data available
-   */
-  getToonSavings(): {
-    originalSize: number;
-    compressedSize: number;
-    savedCharacters: number;
-    percentageSaved: number;
-  } | null {
-    const toonTokensBefore = this.interaction.toonTokensBefore;
-    const toonTokensAfter = this.interaction.toonTokensAfter;
-
-    // Return null if no TOON compression data
-    if (
-      toonTokensBefore === null ||
-      toonTokensAfter === null ||
-      toonTokensBefore === undefined ||
-      toonTokensAfter === undefined
-    ) {
-      return null;
-    }
-
-    // Only show savings if there was actual compression
-    if (toonTokensAfter >= toonTokensBefore || toonTokensBefore === 0) {
-      return null;
-    }
-
-    const savedCharacters = toonTokensBefore - toonTokensAfter;
-    const percentageSaved = (savedCharacters / toonTokensBefore) * 100;
-
-    return {
-      originalSize: toonTokensBefore,
-      compressedSize: toonTokensAfter,
-      savedCharacters,
-      percentageSaved,
-    };
-  }
+  return {
+    originalSize: toonTokensBefore,
+    compressedSize: toonTokensAfter,
+    savedCharacters,
+    percentageSaved,
+  };
+}
 }

@@ -20,6 +20,7 @@ export function getTokenizer(provider: SupportedProvider): Tokenizer {
     case "ollama":
     case "cohere":
     case "zhipuai":
+    case "mistral":
       // These providers use tiktoken-compatible tokenization
       return new TiktokenTokenizer();
     default:

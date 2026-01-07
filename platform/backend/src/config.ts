@@ -466,6 +466,11 @@ export default {
         process.env.ARCHESTRA_ZHIPUAI_BASE_URL ||
         "https://api.z.ai/api/paas/v4",
     },
+    mistral: {
+      baseUrl:
+        process.env.ARCHESTRA_MISTRAL_BASE_URL || "https://api.mistral.ai/v1",
+      apiKey: process.env.ARCHESTRA_CHAT_MISTRAL_API_KEY || "",
+    },
   },
   chat: {
     openai: {
@@ -499,6 +504,12 @@ export default {
       baseUrl:
         process.env.ARCHESTRA_CHAT_ZHIPUAI_BASE_URL ||
         "https://api.z.ai/api/paas/v4",
+    },
+    mistral: {
+      apiKey: process.env.ARCHESTRA_CHAT_MISTRAL_API_KEY || "",
+      baseUrl:
+        process.env.ARCHESTRA_CHAT_MISTRAL_BASE_URL ||
+        "https://api.mistral.ai/v1",
     },
     mcp: {
       remoteServerUrl: process.env.ARCHESTRA_CHAT_MCP_SERVER_URL || "",

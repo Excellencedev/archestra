@@ -119,6 +119,19 @@ export class OpenAiDualLlmClient implements DualLlmClient {
 }
 
 /**
+ * Mistral implementation of DualLlmClient
+ * Reuses OpenAI implementation since Mistral is OpenAI-compatible
+ */
+export class MistralDualLlmClient extends OpenAiDualLlmClient {
+  constructor(apiKey: string, model = "mistral-large-latest") {
+    super(apiKey, model);
+    logger.debug({ model }, "[dualLlmClient] Mistral: initializing client");
+    (this as unknown as { client: { baseURL: string } }).client.baseURL =
+      config.llm.mistral.baseUrl;
+  }
+}
+
+/**
  * Anthropic implementation of DualLlmClient
  */
 export class AnthropicDualLlmClient implements DualLlmClient {
@@ -982,6 +995,11 @@ export function createDualLlmClient(
         throw new Error("API key required for Zhipuai dual LLM");
       }
       return new ZhipuaiDualLlmClient(apiKey, model);
+    case "mistral":
+      if (!apiKey) {
+        throw new Error("API key required for Mistral dual LLM");
+      }
+      return new MistralDualLlmClient(apiKey);
     default:
       logger.debug(
         { provider },

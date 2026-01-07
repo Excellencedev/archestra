@@ -551,6 +551,44 @@ export async function fetchGeminiModelsViaVertexAi(): Promise<ModelInfo[]> {
 }
 
 /**
+ * Fetch models from Mistral API
+ */
+async function fetchMistralModels(apiKey: string): Promise<ModelInfo[]> {
+  const baseUrl = config.chat.mistral.baseUrl;
+  const url = `${baseUrl}/models`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error(
+      { status: response.status, error: errorText },
+      "Failed to fetch Mistral models",
+    );
+    throw new Error(`Failed to fetch Mistral models: ${response.status}`);
+  }
+
+  const data = (await response.json()) as {
+    data: Array<{
+      id: string;
+      name?: string;
+      created: number;
+    }>;
+  };
+
+  return data.data.map((model) => ({
+    id: model.id,
+    displayName: model.name || model.id,
+    provider: "mistral" as const,
+    createdAt: new Date(model.created * 1000).toISOString(),
+  }));
+}
+
+/**
  * Get API key for a provider using resolution priority: personal → team → org_wide → env
  */
 async function getProviderApiKey({
@@ -601,6 +639,8 @@ async function getProviderApiKey({
       return config.chat.ollama.apiKey || "";
     case "zhipuai":
       return config.chat.zhipuai?.apiKey || null;
+    case "mistral":
+      return config.chat.mistral.apiKey || null;
     default:
       return null;
   }
@@ -619,6 +659,7 @@ const modelFetchers: Record<
   ollama: fetchOllamaModels,
   cohere: fetchCohereModels,
   zhipuai: fetchZhipuaiModels,
+  mistral: fetchMistralModels,
 };
 
 /**
@@ -670,7 +711,9 @@ export async function fetchModelsForProvider({
 
   try {
     let models: ModelInfo[] = [];
-    if (["anthropic", "cerebras", "openai", "cohere"].includes(provider)) {
+    if (
+      ["anthropic", "cerebras", "openai", "cohere", "mistral"].includes(provider)
+    ) {
       if (apiKey) {
         models = await modelFetchers[provider](apiKey);
       }

@@ -2,6 +2,7 @@ import type {
   Anthropic,
   Cohere,
   Gemini,
+  Mistral,
   Ollama,
   OpenAi,
   Vllm,
@@ -13,6 +14,7 @@ export type ProviderMessage =
   | Anthropic.Types.MessagesRequest["messages"][number]
   | Cohere.Types.ChatRequest["messages"][number]
   | Gemini.Types.GenerateContentRequest["contents"][number]
+  | Mistral.Types.ChatCompletionsRequest["messages"][number]
   | Vllm.Types.ChatCompletionsRequest["messages"][number]
   | Ollama.Types.ChatCompletionsRequest["messages"][number]
   | Zhipuai.Types.ChatCompletionsRequest["messages"][number];
@@ -63,13 +65,14 @@ export abstract class BaseTokenizer implements Tokenizer {
       }
 
       if (Array.isArray(message.content)) {
-        const text = message.content.reduce(
-          (acc: string, block: { type?: string; text?: string }) => {
-            if (block.type === "text" && typeof block.text === "string") {
-              acc += block.text;
-            }
-            return acc;
-          },
+        const text = (
+          message.content as Array<{ type?: string; text?: string }>
+        ).reduce((acc: string, block: { type?: string; text?: string }) => {
+          if (block.type === "text" && typeof block.text === "string") {
+            acc += block.text;
+          }
+          return acc;
+        },
           "",
         );
 

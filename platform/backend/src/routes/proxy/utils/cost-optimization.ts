@@ -12,6 +12,7 @@ import type {
   Cerebras,
   Cohere,
   Gemini,
+  Mistral,
   OpenAi,
   Vllm,
   Zhipuai,
@@ -26,6 +27,7 @@ type ProviderMessages = {
   vllm: Vllm.Types.ChatCompletionsRequest["messages"];
   ollama: Vllm.Types.ChatCompletionsRequest["messages"];
   zhipuai: Zhipuai.Types.ChatCompletionsRequest["messages"];
+  mistral: Mistral.Types.ChatCompletionsRequest["messages"];
 };
 
 /**

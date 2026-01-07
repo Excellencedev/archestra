@@ -3,6 +3,7 @@ import { createCerebras } from "@ai-sdk/cerebras";
 import { createCohere } from "@ai-sdk/cohere";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createVertex } from "@ai-sdk/google-vertex";
+import { createMistral } from "@ai-sdk/mistral";
 import { createOpenAI } from "@ai-sdk/openai";
 import {
   EXTERNAL_AGENT_ID_HEADER,
@@ -58,8 +59,13 @@ export function detectProviderFromModel(model: string): SupportedChatProvider {
   if (lowerModel.includes("command")) {
     return "cohere";
   }
+
   if (lowerModel.includes("glm") || lowerModel.includes("chatglm")) {
     return "zhipuai";
+  }
+
+  if (lowerModel.includes("mistral") || lowerModel.includes("pixtral")) {
+    return "mistral";
   }
 
   // Default to anthropic for backwards compatibility
@@ -96,14 +102,14 @@ export async function resolveProviderApiKey(params: {
 
   if (resolvedApiKey?.secretId) {
     const secret = await secretManager().getSecret(resolvedApiKey.secretId);
-    // Support both old format (anthropicApiKey) and new format (apiKey)
     const secretValue =
       secret?.secret?.apiKey ??
       secret?.secret?.anthropicApiKey ??
       secret?.secret?.geminiApiKey ??
       secret?.secret?.openaiApiKey ??
       secret?.secret?.zhipuaiApiKey ??
-      secret?.secret?.cohereApiKey;
+      secret?.secret?.cohereApiKey ??
+      secret?.secret?.mistralApiKey;
     if (secretValue) {
       providerApiKey = secretValue as string;
       apiKeySource = resolvedApiKey.scope;
@@ -134,6 +140,8 @@ export async function resolveProviderApiKey(params: {
       providerApiKey = config.chat.ollama.apiKey;
     } else if (provider === "zhipuai" && config.chat.zhipuai.apiKey) {
       providerApiKey = config.chat.zhipuai.apiKey;
+    } else if (provider === "mistral" && config.chat.mistral.apiKey) {
+      providerApiKey = config.chat.mistral.apiKey;
       apiKeySource = "environment";
     }
   }
@@ -381,6 +389,16 @@ export function createLLMModel(params: {
     const client = createCohere({
       apiKey,
       baseURL: `http://localhost:${config.api.port}/v1/cohere/${agentId}`,
+      headers,
+    });
+    return client(modelName);
+  }
+
+  if (provider === "mistral") {
+    // URL format: /v1/mistral/:agentId (SDK appends /chat/completions)
+    const client = createMistral({
+      apiKey,
+      baseURL: `http://localhost:${config.api.port}/v1/mistral/${agentId}`,
       headers,
     });
     return client(modelName);

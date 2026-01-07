@@ -1,0 +1,24 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/v1/models"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "object": "list",
+      "data": [
+        {
+          "id": "mistral-large-latest",
+          "object": "model",
+          "created": 1703186717,
+          "owned_by": "mistralai",
+          "name": "Mistral Large Latest"
+        }
+      ]
+    }
+  }
+}

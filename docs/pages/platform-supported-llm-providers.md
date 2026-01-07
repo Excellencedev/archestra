@@ -255,3 +255,18 @@ See the [Vertex AI authentication guide](https://cloud.google.com/vertex-ai/docs
 - **API Key format**: Obtain your API key from the [Zhipu AI Platform](https://z.ai/)
 - **Free tier available**: The GLM-4.5-Flash model is available on the free tier for testing and development
 - **Chinese language support**: GLM models excel at Chinese language understanding and generation, while maintaining strong English capabilities
+
+## Mistral AI
+
+### Supported Mistral APIs
+
+- **Chat Completions API** (`/chat/completions`)
+
+### Mistral Connection Details
+
+- **Base URL**: `http://localhost:9000/v1/mistral/{agent-id}`
+- **Authentication**: Pass your Mistral API key in the `Authorization` header as `Bearer <your-api-key>`
+
+### Important Notes
+
+- **OpenAI Compatibility**: Mistral's API is largely OpenAI-compatible. Archestra leverages this compatibility while providing Mistral-specific features through its proxy.
