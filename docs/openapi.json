@@ -8928,6 +8928,588 @@
           "object"
         ]
       },
+      "MistralChatCompletionRequestInput": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "system"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ],
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "image_url"
+                                    ]
+                                  },
+                                  "image_url": {
+                                    "type": "object",
+                                    "properties": {
+                                      "url": {
+                                        "type": "string"
+                                      },
+                                      "detail": {
+                                        "type": "string",
+                                        "enum": [
+                                          "auto",
+                                          "low",
+                                          "high"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "url",
+                                      "detail"
+                                    ],
+                                    "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "image_url"
+                                ],
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "user"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "assistant"
+                      ]
+                    },
+                    "content": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ],
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "function"
+                                ]
+                              },
+                              "function": {
+                                "type": "object",
+                                "properties": {
+                                  "arguments": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "arguments",
+                                  "name"
+                                ],
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "function"
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        ],
+                        "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                      }
+                    }
+                  },
+                  "required": [
+                    "role"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "tool"
+                      ]
+                    },
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "tool_call_id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "content",
+                    "tool_call_id"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              ],
+              "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "function"
+                      ]
+                    },
+                    "function": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "parameters": {
+                          "description": "\n    https://docs.mistral.ai/api/#operation/createChatCompletion\n  ",
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "strict": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "function"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              ],
+              "description": "\n  A function tool that can be used to generate a response.\n  https://docs.mistral.ai/api/#operation/createChatCompletion\n  "
+            }
+          },
+          "tool_choice": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "auto",
+                  "any",
+                  "required"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "function"
+                    ]
+                  },
+                  "function": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "function"
+                ]
+              }
+            ],
+            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "safe_prompt": {
+            "type": "boolean"
+          },
+          "random_seed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "model",
+          "messages"
+        ]
+      },
+      "MistralChatCompletionResponseInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "finish_reason": {
+                  "type": "string",
+                  "enum": [
+                    "stop",
+                    "length",
+                    "tool_calls",
+                    "content_filter",
+                    "model_exceeded"
+                  ]
+                },
+                "index": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "assistant"
+                      ]
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "function"
+                                ]
+                              },
+                              "function": {
+                                "type": "object",
+                                "properties": {
+                                  "arguments": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "arguments",
+                                  "name"
+                                ],
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "function"
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        ],
+                        "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                      }
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              },
+              "required": [
+                "finish_reason",
+                "index",
+                "message"
+              ],
+              "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+            }
+          },
+          "created": {
+            "type": "number"
+          },
+          "model": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "chat.completion"
+            ]
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "completion_tokens": {
+                "type": "number"
+              },
+              "prompt_tokens": {
+                "type": "number"
+              },
+              "total_tokens": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "completion_tokens",
+              "prompt_tokens",
+              "total_tokens"
+            ],
+            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+          }
+        },
+        "required": [
+          "id",
+          "choices",
+          "created",
+          "model",
+          "object"
+        ]
+      },
       "WebSocketMessageInput": {
         "oneOf": [
           {
@@ -18505,6 +19087,611 @@
               ],
               "additionalProperties": false
             }
+          }
+        },
+        "required": [
+          "id",
+          "choices",
+          "created",
+          "model",
+          "object"
+        ],
+        "additionalProperties": false
+      },
+      "MistralChatCompletionRequest": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ],
+                            "additionalProperties": false,
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "system"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ],
+                                "additionalProperties": false,
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "image_url"
+                                    ]
+                                  },
+                                  "image_url": {
+                                    "type": "object",
+                                    "properties": {
+                                      "url": {
+                                        "type": "string"
+                                      },
+                                      "detail": {
+                                        "type": "string",
+                                        "enum": [
+                                          "auto",
+                                          "low",
+                                          "high"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "url",
+                                      "detail"
+                                    ],
+                                    "additionalProperties": false,
+                                    "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "image_url"
+                                ],
+                                "additionalProperties": false,
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            ],
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "user"
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "assistant"
+                      ]
+                    },
+                    "content": {
+                      "anyOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ],
+                                "additionalProperties": false,
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "function"
+                                ]
+                              },
+                              "function": {
+                                "type": "object",
+                                "properties": {
+                                  "arguments": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "arguments",
+                                  "name"
+                                ],
+                                "additionalProperties": false,
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "function"
+                            ],
+                            "additionalProperties": false,
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        ],
+                        "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                      }
+                    }
+                  },
+                  "required": [
+                    "role"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "tool"
+                      ]
+                    },
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "text"
+                                ]
+                              },
+                              "text": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "text"
+                            ],
+                            "additionalProperties": false,
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        }
+                      ]
+                    },
+                    "tool_call_id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "content",
+                    "tool_call_id"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              ],
+              "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+            }
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "function"
+                      ]
+                    },
+                    "function": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "parameters": {
+                          "description": "\n    https://docs.mistral.ai/api/#operation/createChatCompletion\n  ",
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "strict": {
+                          "anyOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "additionalProperties": false,
+                      "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "function"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              ],
+              "description": "\n  A function tool that can be used to generate a response.\n  https://docs.mistral.ai/api/#operation/createChatCompletion\n  "
+            }
+          },
+          "tool_choice": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "auto",
+                  "any",
+                  "required"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "function"
+                    ]
+                  },
+                  "function": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "type",
+                  "function"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "safe_prompt": {
+            "type": "boolean"
+          },
+          "random_seed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "model",
+          "messages"
+        ],
+        "additionalProperties": false
+      },
+      "MistralChatCompletionResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "finish_reason": {
+                  "type": "string",
+                  "enum": [
+                    "stop",
+                    "length",
+                    "tool_calls",
+                    "content_filter",
+                    "model_exceeded"
+                  ]
+                },
+                "index": {
+                  "type": "number"
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "role": {
+                      "type": "string",
+                      "enum": [
+                        "assistant"
+                      ]
+                    },
+                    "tool_calls": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "function"
+                                ]
+                              },
+                              "function": {
+                                "type": "object",
+                                "properties": {
+                                  "arguments": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "arguments",
+                                  "name"
+                                ],
+                                "additionalProperties": false,
+                                "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "function"
+                            ],
+                            "additionalProperties": false,
+                            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                          }
+                        ],
+                        "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                      }
+                    }
+                  },
+                  "required": [
+                    "content",
+                    "role"
+                  ],
+                  "additionalProperties": false,
+                  "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+                }
+              },
+              "required": [
+                "finish_reason",
+                "index",
+                "message"
+              ],
+              "additionalProperties": false,
+              "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
+            }
+          },
+          "created": {
+            "type": "number"
+          },
+          "model": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "chat.completion"
+            ]
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "completion_tokens": {
+                "type": "number"
+              },
+              "prompt_tokens": {
+                "type": "number"
+              },
+              "total_tokens": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "completion_tokens",
+              "prompt_tokens",
+              "total_tokens"
+            ],
+            "additionalProperties": false,
+            "description": "https://docs.mistral.ai/api/#operation/createChatCompletion"
           }
         },
         "required": [
@@ -33464,7 +34651,8 @@
                           "openai",
                           "vllm",
                           "ollama",
-                          "zhipuai"
+                          "zhipuai",
+                          "mistral"
                         ]
                       },
                       "secretId": {
@@ -33779,7 +34967,8 @@
                       "openai",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "apiKey": {
@@ -33845,7 +35034,8 @@
                         "openai",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "secretId": {
@@ -34128,7 +35318,8 @@
                 "openai",
                 "vllm",
                 "ollama",
-                "zhipuai"
+                "zhipuai",
+                "mistral"
               ]
             },
             "in": "query",
@@ -34167,7 +35358,8 @@
                           "openai",
                           "vllm",
                           "ollama",
-                          "zhipuai"
+                          "zhipuai",
+                          "mistral"
                         ]
                       },
                       "secretId": {
@@ -34505,7 +35697,8 @@
                         "openai",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "secretId": {
@@ -34881,7 +36074,8 @@
                         "openai",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "secretId": {
@@ -35414,7 +36608,8 @@
                 "openai",
                 "vllm",
                 "ollama",
-                "zhipuai"
+                "zhipuai",
+                "mistral"
               ]
             },
             "in": "query",
@@ -35448,7 +36643,8 @@
                           "openai",
                           "vllm",
                           "ollama",
-                          "zhipuai"
+                          "zhipuai",
+                          "mistral"
                         ]
                       },
                       "createdAt": {
@@ -36600,7 +37796,8 @@
                       "openai",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "chatApiKeyId": {
@@ -37415,7 +38612,8 @@
                       "openai",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "chatApiKeyId": {
@@ -64983,6 +66181,536 @@
         }
       }
     },
+    "/v1/mistral/chat/completions": {
+      "post": {
+        "operationId": "mistralChatCompletionsWithDefaultAgent",
+        "tags": [
+          "llm-proxy"
+        ],
+        "description": "Create a chat completion with Mistral AI (uses default agent)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MistralChatCompletionRequestInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "description": "The user agent of the client"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "description": "Bearer token for Mistral AI"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistralChatCompletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_validation_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_authentication_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_authorization_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_not_found_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_conflict_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_internal_server_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mistral/{agentId}/chat/completions": {
+      "post": {
+        "operationId": "mistralChatCompletionsWithAgent",
+        "tags": [
+          "llm-proxy"
+        ],
+        "description": "Create a chat completion with Mistral AI for a specific agent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MistralChatCompletionRequestInput"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+            },
+            "in": "path",
+            "name": "agentId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "user-agent",
+            "required": false,
+            "description": "The user agent of the client"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "description": "Bearer token for Mistral AI"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistralChatCompletionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_validation_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_authentication_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_authorization_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_not_found_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_conflict_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "api_internal_server_error"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/oauth/initiate": {
       "post": {
         "operationId": "initiateOAuth",
@@ -66677,7 +68405,8 @@
                           "cerebras",
                           "vllm",
                           "ollama",
-                          "zhipuai"
+                          "zhipuai",
+                          "mistral"
                         ]
                       },
                       "targetModel": {
@@ -66993,7 +68722,8 @@
                       "cerebras",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "targetModel": {
@@ -67084,7 +68814,8 @@
                         "cerebras",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "targetModel": {
@@ -67401,7 +69132,8 @@
                       "cerebras",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "targetModel": {
@@ -67496,7 +69228,8 @@
                         "cerebras",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "targetModel": {
@@ -76870,7 +78603,8 @@
                           "cerebras",
                           "vllm",
                           "ollama",
-                          "zhipuai"
+                          "zhipuai",
+                          "mistral"
                         ]
                       },
                       "model": {
@@ -77141,7 +78875,8 @@
                       "cerebras",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "model": {
@@ -77189,7 +78924,8 @@
                         "cerebras",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "model": {
@@ -77480,7 +79216,8 @@
                         "cerebras",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "model": {
@@ -77750,7 +79487,8 @@
                       "cerebras",
                       "vllm",
                       "ollama",
-                      "zhipuai"
+                      "zhipuai",
+                      "mistral"
                     ]
                   },
                   "model": {
@@ -77803,7 +79541,8 @@
                         "cerebras",
                         "vllm",
                         "ollama",
-                        "zhipuai"
+                        "zhipuai",
+                        "mistral"
                       ]
                     },
                     "model": {

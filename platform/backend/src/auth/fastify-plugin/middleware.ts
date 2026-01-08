@@ -7,10 +7,7 @@ import logger from "@/logging";
 import { UserModel } from "@/models";
 import { ApiError } from "@/types";
 
-const { requiredEndpointPermissionsMap } = config.enterpriseLicenseActivated
-  ? // biome-ignore lint/style/noRestrictedImports: conditional endpoint permissions
-  await import("@shared/access-control.ee")
-  : await import("@shared/access-control");
+import { requiredEndpointPermissionsMap } from "@shared/access-control";
 
 export class Authnz {
   public handle = async (request: FastifyRequest, _reply: FastifyReply) => {
