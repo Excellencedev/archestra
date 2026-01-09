@@ -102,17 +102,48 @@ export async function resolveProviderApiKey(params: {
 
   if (resolvedApiKey?.secretId) {
     const secret = await secretManager().getSecret(resolvedApiKey.secretId);
-    const secretValue =
-      secret?.secret?.apiKey ??
-      secret?.secret?.anthropicApiKey ??
-      secret?.secret?.geminiApiKey ??
-      secret?.secret?.openaiApiKey ??
-      secret?.secret?.zhipuaiApiKey ??
-      secret?.secret?.cohereApiKey ??
-      secret?.secret?.mistralApiKey;
-    if (secretValue) {
-      providerApiKey = secretValue as string;
-      apiKeySource = resolvedApiKey.scope;
+    if (secret?.secret) {
+      let secretValue: string | undefined;
+
+      switch (provider) {
+        case "anthropic":
+          secretValue =
+            (secret.secret.anthropicApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        case "openai":
+          secretValue =
+            (secret.secret.openaiApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        case "gemini":
+          secretValue =
+            (secret.secret.geminiApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        case "mistral":
+          secretValue =
+            (secret.secret.mistralApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        case "cohere":
+          secretValue =
+            (secret.secret.cohereApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        case "zhipuai":
+          secretValue =
+            (secret.secret.zhipuaiApiKey as string) ??
+            (secret.secret.apiKey as string);
+          break;
+        default:
+          secretValue = secret.secret.apiKey as string;
+      }
+
+      if (secretValue) {
+        providerApiKey = secretValue;
+        apiKeySource = resolvedApiKey.scope;
+      }
     }
   }
 

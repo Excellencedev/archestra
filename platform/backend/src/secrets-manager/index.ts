@@ -4,6 +4,7 @@ import logger from "@/logging";
 import {
   ApiError,
   type ISecretManager,
+  type SupportedChatProvider,
   type VaultConfig,
   type VaultKvVersion,
 } from "@/types";
@@ -405,12 +406,41 @@ export function assertByosEnabled(): ReadonlyVaultSecretManager {
 
 export async function getSecretValueForLlmProviderApiKey(
   secretId: string,
-): Promise<string | unknown> {
+  provider?: SupportedChatProvider,
+): Promise<string | undefined> {
   const secret = await secretManager().getSecret(secretId);
+  if (!secret?.secret) return undefined;
+
+  if (provider) {
+    switch (provider) {
+      case "anthropic":
+        return (
+          (secret.secret.anthropicApiKey as string) ??
+          (secret.secret.apiKey as string)
+        );
+      case "openai":
+        return (
+          (secret.secret.openaiApiKey as string) ??
+          (secret.secret.apiKey as string)
+        );
+      case "gemini":
+        return (
+          (secret.secret.geminiApiKey as string) ??
+          (secret.secret.apiKey as string)
+        );
+      case "mistral":
+        return (
+          (secret.secret.mistralApiKey as string) ??
+          (secret.secret.apiKey as string)
+        );
+    }
+  }
+
   return (
-    secret?.secret?.apiKey ??
-    secret?.secret?.anthropicApiKey ??
-    secret?.secret?.geminiApiKey ??
-    secret?.secret?.openaiApiKey
+    (secret.secret.apiKey as string) ??
+    (secret.secret.anthropicApiKey as string) ??
+    (secret.secret.geminiApiKey as string) ??
+    (secret.secret.openaiApiKey as string) ??
+    (secret.secret.mistralApiKey as string)
   );
 }

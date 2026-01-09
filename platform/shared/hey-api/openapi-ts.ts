@@ -7,10 +7,18 @@ import { MCP_CATALOG_API_BASE_URL } from "../consts";
  * which includes all enterprise routes regardless of local .env settings.
  * For manual regeneration with a running dev server, use localhost.
  */
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const archestraApiInput =
-  process.env.CODEGEN === "true"
-    ? "../../docs/openapi.json"
+  process.env.CODEGEN === "true" || process.env.CODEGEN === "1"
+    ? path.resolve(__dirname, "../../../docs/openapi.json")
     : "http://localhost:9000/openapi.json";
+
+console.log(`Using OpenAPI input: ${archestraApiInput}`);
 
 const archestraApiConfig = await defineConfig({
   input: archestraApiInput,

@@ -97,7 +97,7 @@ class MistralChatCompletionInteraction implements InteractionUtils {
 
   getLastAssistantResponse(): string {
     const content = this.response.choices[0]?.message?.content;
-    return content ?? "";
+    return (content as string) ?? "";
   }
 
   getToolRefusedCount(): number {

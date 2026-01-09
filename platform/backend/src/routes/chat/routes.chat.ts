@@ -79,6 +79,7 @@ async function getSmartDefaultModel(
     if (resolvedKey?.secretId) {
       const secretValue = await getSecretValueForLlmProviderApiKey(
         resolvedKey.secretId,
+        provider,
       );
 
       if (secretValue) {

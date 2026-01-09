@@ -21,6 +21,7 @@ import {
   constructResponseSchema,
   type Gemini,
   type OpenAi,
+  type SupportedChatProvider,
   SupportedChatProviderSchema,
 } from "@/types";
 
@@ -614,6 +615,7 @@ async function getProviderApiKey({
   if (apiKey?.secretId) {
     const secretValue = await getSecretValueForLlmProviderApiKey(
       apiKey.secretId,
+      provider as SupportedChatProvider,
     );
 
     if (secretValue) {

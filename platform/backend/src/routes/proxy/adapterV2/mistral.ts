@@ -148,6 +148,10 @@ class MistralRequestAdapter
     };
   }
 
+  convertToolResultContent(messages: MistralMessages): MistralMessages {
+    return messages;
+  }
+
   toProviderRequest(): MistralRequest {
     let messages = this.request.messages;
 

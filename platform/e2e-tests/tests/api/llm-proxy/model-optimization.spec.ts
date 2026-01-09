@@ -168,11 +168,7 @@ const geminiConfig: ModelOptimizationTestConfig = {
   getModelFromResponse: (response) => response.modelVersion,
 };
 
-const cohereConfig: ModelOptimizationTestConfig = {
-  providerName: "Cohere",
-  provider: "cohere",
-
-  endpoint: (agentId) => `/v1/cohere/${agentId}/chat`,
+  provider: SupportedProvider;
 
   headers: (wiremockStub) => ({
     Authorization: `Bearer ${wiremockStub}`,
@@ -181,42 +177,7 @@ const cohereConfig: ModelOptimizationTestConfig = {
 
   buildRequest: (content, tools) => {
     const request: Record<string, unknown> = {
-      model: "e2e-test-cohere-baseline",
-      messages: [{ role: "user", content: [{ type: "text", text: content }] }],
-    };
-    if (tools && tools.length > 0) {
-      request.tools = tools.map((t) => ({
-        type: "function",
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.parameters,
-        },
-      }));
-    }
-    return request;
-  },
-
-  baselineModel: "e2e-test-cohere-baseline",
-  optimizedModel: "e2e-test-cohere-optimized",
-
-  getModelFromResponse: (response) => response.message?.model ?? response.model,
-};
-
-const cerebrasConfig: ModelOptimizationTestConfig = {
-  providerName: "Cerebras",
-  provider: "cerebras",
-
-  endpoint: (agentId) => `/v1/cerebras/${agentId}/chat/completions`,
-
-  headers: (wiremockStub) => ({
-    Authorization: `Bearer ${wiremockStub}`,
-    "Content-Type": "application/json",
-  }),
-
-  buildRequest: (content, tools) => {
-    const request: Record<string, unknown> = {
-      model: "e2e-test-cerebras-baseline",
+  provider: SupportedProvider;
       messages: [{ role: "user", content }],
     };
     if (tools && tools.length > 0) {
@@ -232,113 +193,7 @@ const cerebrasConfig: ModelOptimizationTestConfig = {
     return request;
   },
 
-  baselineModel: "e2e-test-cerebras-baseline",
-  optimizedModel: "e2e-test-cerebras-optimized",
-
-  getModelFromResponse: (response) => response.model,
-};
-
-const vllmConfig: ModelOptimizationTestConfig = {
-  providerName: "vLLM",
-  provider: "vllm",
-
-  endpoint: (agentId) => `/v1/vllm/${agentId}/chat/completions`,
-
-  headers: (wiremockStub) => ({
-    Authorization: `Bearer ${wiremockStub}`,
-    "Content-Type": "application/json",
-  }),
-
-  buildRequest: (content, tools) => {
-    const request: Record<string, unknown> = {
-      model: "e2e-test-vllm-baseline",
-      messages: [{ role: "user", content }],
-    };
-    if (tools && tools.length > 0) {
-      request.tools = tools.map((t) => ({
-        type: "function",
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.parameters,
-        },
-      }));
-    }
-    return request;
-  },
-
-  baselineModel: "e2e-test-vllm-baseline",
-  optimizedModel: "e2e-test-vllm-optimized",
-
-  getModelFromResponse: (response) => response.model,
-};
-
-const ollamaConfig: ModelOptimizationTestConfig = {
-  providerName: "Ollama",
-  provider: "ollama",
-
-  endpoint: (agentId) => `/v1/ollama/${agentId}/chat/completions`,
-
-  headers: (wiremockStub) => ({
-    Authorization: `Bearer ${wiremockStub}`,
-    "Content-Type": "application/json",
-  }),
-
-  buildRequest: (content, tools) => {
-    const request: Record<string, unknown> = {
-      model: "e2e-test-ollama-baseline",
-      messages: [{ role: "user", content }],
-    };
-    if (tools && tools.length > 0) {
-      request.tools = tools.map((t) => ({
-        type: "function",
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.parameters,
-        },
-      }));
-    }
-    return request;
-  },
-
-  baselineModel: "e2e-test-ollama-baseline",
-  optimizedModel: "e2e-test-ollama-optimized",
-
-  getModelFromResponse: (response) => response.model,
-};
-
-const zhipuaiConfig: ModelOptimizationTestConfig = {
-  providerName: "Zhipuai",
-  provider: "zhipuai",
-
-  endpoint: (agentId) => `/v1/zhipuai/${agentId}/chat/completions`,
-
-  headers: (wiremockStub) => ({
-    Authorization: `Bearer ${wiremockStub}`,
-    "Content-Type": "application/json",
-  }),
-
-  buildRequest: (content, tools) => {
-    const request: Record<string, unknown> = {
-      model: "e2e-test-zhipuai-baseline",
-      messages: [{ role: "user", content }],
-    };
-    if (tools && tools.length > 0) {
-      request.tools = tools.map((t) => ({
-        type: "function",
-        function: {
-          name: t.name,
-          description: t.description,
-          parameters: t.parameters,
-        },
-      }));
-    }
-    return request;
-  },
-
-  baselineModel: "e2e-test-zhipuai-baseline",
-  optimizedModel: "e2e-test-zhipuai-optimized",
+  provider: SupportedProvider;
 
   getModelFromResponse: (response) => response.model,
 };
@@ -371,11 +226,7 @@ const testConfigs: ModelOptimizationTestConfig[] = [
   openaiConfig,
   anthropicConfig,
   geminiConfig,
-  cohereConfig,
-  cerebrasConfig,
-  vllmConfig,
-  ollamaConfig,
-  zhipuaiConfig,
+  provider: SupportedProvider;
 ];
 
 test.describe("LLMProxy-ModelOptimization", () => {
