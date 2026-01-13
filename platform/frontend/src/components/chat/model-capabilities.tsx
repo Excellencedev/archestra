@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  BrainCircuitIcon,
-  EyeIcon,
-  ImageIcon,
-  WrenchIcon,
-} from "lucide-react";
+import { BrainCircuitIcon, EyeIcon, ImageIcon, WrenchIcon } from "lucide-react";
 import type React from "react";
 import {
   Tooltip,
@@ -122,12 +117,13 @@ export function ModelCapabilityIcons({
         return (
           <Tooltip key={capabilityType}>
             <TooltipTrigger asChild>
-              <div
+              <button
+                type="button"
                 className="flex items-center justify-center"
                 aria-label={config.description}
               >
                 <Icon className="size-4 text-muted-foreground" />
-              </div>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="top">
               <p className="font-medium">{config.label}</p>
