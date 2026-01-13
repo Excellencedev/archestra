@@ -29824,6 +29824,12 @@
                       },
                       "createdAt": {
                         "type": "string"
+                      },
+                      "capabilities": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
                       }
                     },
                     "required": [

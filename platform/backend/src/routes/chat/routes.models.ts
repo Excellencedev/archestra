@@ -17,6 +17,11 @@ import {
 } from "@/routes/proxy/utils/gemini-client";
 import { getSecretValueForLlmProviderApiKey } from "@/secrets-manager";
 import {
+  extractCapabilities,
+  fetchOpenRouterModels,
+  type OpenRouterModel,
+} from "@/services/openrouter-client";
+import {
   type Anthropic,
   constructResponseSchema,
   type Gemini,
@@ -34,6 +39,7 @@ const ChatModelSchema = z.object({
   displayName: z.string(),
   provider: SupportedChatProviderSchema,
   createdAt: z.string().optional(),
+  capabilities: z.array(z.string()).optional(),
 });
 
 export interface ModelInfo {
@@ -41,6 +47,7 @@ export interface ModelInfo {
   displayName: string;
   provider: SupportedProvider;
   createdAt?: string;
+  capabilities?: string[];
 }
 
 /**
@@ -463,6 +470,83 @@ const modelFetchers: Record<
 };
 
 /**
+ * Normalize model ID for matching
+ * Handles both "gpt-4" and "openai/gpt-4" formats
+ * Extracts the model name without provider prefix
+ *
+ * @param modelId - Model ID to normalize (e.g., "openai/gpt-4" or "gpt-4")
+ * @returns Normalized model ID without provider prefix (e.g., "gpt-4")
+ */
+export function normalizeModelId(modelId: string): string {
+  if (!modelId) return "";
+
+  // Remove provider prefix if present (e.g., "openai/gpt-4" -> "gpt-4")
+  const parts = modelId.split("/");
+  return parts.length > 1 ? parts[parts.length - 1] : modelId;
+}
+
+/**
+ * Merge OpenRouter metadata with provider model data
+ * Matches models by ID (with and without provider prefix)
+ * Preserves all existing model fields
+ *
+ * @param providerModels - Models from provider APIs
+ * @param openRouterModels - Models from OpenRouter API
+ * @returns Provider models enriched with capabilities from OpenRouter
+ */
+export function mergeOpenRouterCapabilities(
+  providerModels: ModelInfo[],
+  openRouterModels: OpenRouterModel[],
+): ModelInfo[] {
+  // Create a map of normalized OpenRouter model IDs to their capabilities
+  const capabilitiesMap = new Map<string, string[]>();
+
+  for (const orModel of openRouterModels) {
+    const capabilities = extractCapabilities(orModel);
+    if (capabilities.length > 0) {
+      // Store capabilities for both the full ID and normalized ID
+      capabilitiesMap.set(orModel.id, capabilities);
+      capabilitiesMap.set(normalizeModelId(orModel.id), capabilities);
+
+      // Also store for canonical slug if different
+      if (orModel.canonical_slug && orModel.canonical_slug !== orModel.id) {
+        capabilitiesMap.set(orModel.canonical_slug, capabilities);
+        capabilitiesMap.set(
+          normalizeModelId(orModel.canonical_slug),
+          capabilities,
+        );
+      }
+    }
+  }
+
+  // Merge capabilities into provider models
+  return providerModels.map((model) => {
+    // Try to find capabilities using various matching strategies
+    let capabilities: string[] | undefined;
+
+    // Strategy 1: Direct match with full ID
+    capabilities = capabilitiesMap.get(model.id);
+
+    // Strategy 2: Match with provider prefix (e.g., "openai/gpt-4")
+    if (!capabilities) {
+      const prefixedId = `${model.provider}/${model.id}`;
+      capabilities = capabilitiesMap.get(prefixedId);
+    }
+
+    // Strategy 3: Match with normalized ID
+    if (!capabilities) {
+      capabilities = capabilitiesMap.get(normalizeModelId(model.id));
+    }
+
+    // Return model with capabilities (or empty array if no match)
+    return {
+      ...model,
+      capabilities: capabilities || [],
+    };
+  });
+}
+
+/**
  * Test if an API key is valid by attempting to fetch models from the provider.
  * Throws an error if the key is invalid or the provider is unreachable.
  */
@@ -471,6 +555,34 @@ export async function testProviderApiKey(
   apiKey: string,
 ): Promise<void> {
   await modelFetchers[provider](apiKey);
+}
+
+/**
+ * Fetch OpenRouter models with caching
+ * Caches the result for 12 hours to minimize API calls
+ * Returns empty array on error to allow graceful degradation
+ */
+async function fetchOpenRouterModelsWithCache(): Promise<OpenRouterModel[]> {
+  const cacheKey = CacheKey.OpenRouterModels;
+  const cachedModels = await cacheManager.get<OpenRouterModel[]>(cacheKey);
+
+  if (cachedModels) {
+    logger.debug("Returning cached OpenRouter models");
+    return cachedModels;
+  }
+
+  try {
+    const models = await fetchOpenRouterModels();
+    await cacheManager.set(cacheKey, models, CHAT_MODELS_CACHE_TTL_MS);
+    return models;
+  } catch (error) {
+    logger.error(
+      { error },
+      "Failed to fetch OpenRouter models, continuing without capabilities",
+    );
+    // Return empty array to allow graceful degradation
+    return [];
+  }
 }
 
 /**
@@ -537,6 +649,17 @@ export async function fetchModelsForProvider({
       // Ollama doesn't require API key, pass empty or configured key
       models = await modelFetchers[provider](apiKey || "EMPTY");
     }
+
+    // Fetch OpenRouter models and merge capabilities
+    const openRouterModels = await fetchOpenRouterModelsWithCache();
+    if (openRouterModels.length > 0) {
+      models = mergeOpenRouterCapabilities(models, openRouterModels);
+      logger.debug(
+        { provider, modelCount: models.length },
+        "Merged OpenRouter capabilities with provider models",
+      );
+    }
+
     await cacheManager.set(cacheKey, models, CHAT_MODELS_CACHE_TTL_MS);
     return models;
   } catch (error) {

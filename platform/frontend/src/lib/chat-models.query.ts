@@ -9,6 +9,7 @@ export interface ChatModel {
   displayName: string;
   provider: SupportedProvider;
   createdAt?: string;
+  capabilities?: string[];
 }
 
 /**

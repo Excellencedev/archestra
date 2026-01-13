@@ -16,6 +16,7 @@ import {
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
 import { PromptInputButton } from "@/components/ai-elements/prompt-input";
+import { ModelCapabilityIcons } from "@/components/chat/model-capabilities";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -194,6 +195,12 @@ export function ModelSelector({
                       provider={providerToLogoProvider[provider]}
                     />
                     <ModelSelectorName>{model.displayName}</ModelSelectorName>
+                    {model.capabilities && model.capabilities.length > 0 && (
+                      <ModelCapabilityIcons
+                        capabilities={model.capabilities}
+                        className="ml-2"
+                      />
+                    )}
                     {selectedModel === model.id ? (
                       <CheckIcon className="ml-auto size-4" />
                     ) : (
