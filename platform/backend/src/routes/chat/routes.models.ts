@@ -30,7 +30,7 @@ import {
 } from "@/types";
 
 /** TTL for caching chat models from provider APIs */
-const CHAT_MODELS_CACHE_TTL_MS = TimeInMs.Hour * 2;
+const CHAT_MODELS_CACHE_TTL_MS = TimeInMs.Hour * 12;
 const CHAT_MODELS_CACHE_TTL_HOURS = CHAT_MODELS_CACHE_TTL_MS / TimeInMs.Hour;
 
 // Response schema for models
@@ -660,12 +660,22 @@ export async function fetchModelsForProvider({
       );
     }
 
+    logger.info(
+      { provider, modelCount: models.length },
+      "fetchModelsForProvider:fetched models from provider",
+    );
+
     await cacheManager.set(cacheKey, models, CHAT_MODELS_CACHE_TTL_MS);
     return models;
   } catch (error) {
     logger.error(
-      { provider, organizationId, error },
-      "Error fetching models from provider",
+      {
+        provider,
+        organizationId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+      },
+      "fetchModelsForProvider:error fetching models from provider",
     );
     return [];
   }
