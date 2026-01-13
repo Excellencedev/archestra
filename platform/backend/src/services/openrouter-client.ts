@@ -58,9 +58,7 @@ export async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
         { status: response.status, error: errorText },
         "Failed to fetch OpenRouter models",
       );
-      throw new Error(
-        `Failed to fetch OpenRouter models: ${response.status}`,
-      );
+      throw new Error(`Failed to fetch OpenRouter models: ${response.status}`);
     }
 
     const data = (await response.json()) as OpenRouterResponse;
