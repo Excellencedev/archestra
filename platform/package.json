@@ -7,9 +7,9 @@
     "node": ">=18.0.0 <25.0.0"
   },
   "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "start": "turbo start",
+    "dev": "node init && turbo dev",
+    "build": "node init && turbo build",
+    "start": "node init && turbo start",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "lint:fix:unsafe": "turbo lint:fix:unsafe",

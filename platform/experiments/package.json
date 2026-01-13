@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/main.js",
+    "build": "node init && tsc",
+    "start": "node init && node dist/main.js",
     "proxy:dev": "nodemon --exec \"tsc && node dist/main.js\" --watch src --ext ts",
     "cli-chat-with-guardrails": "tsx src/cli-chat.ts",
     "lint": "biome check",
