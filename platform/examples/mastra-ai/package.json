@@ -4,9 +4,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "dev": "mastra dev",
-    "build": "mastra build",
-    "start": "mastra start",
+    "dev": "node init && mastra dev",
+    "build": "node init && mastra build",
+    "start": "node init && mastra start",
     "typecheck": "tsc --noEmit"
   },
   "license": "ISC",
@@ -14,8 +14,7 @@
   "engines": {
     "node": ">=20.9.0"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^24.7.2",
     "mastra": "^0.16.0",
