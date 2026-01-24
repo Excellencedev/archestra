@@ -78,7 +78,7 @@ const SHUTDOWN_CLEANUP_TIMEOUT_MS = 3000;
 const eeRoutes =
   config.enterpriseLicenseActivated || config.codegenMode
     ? // biome-ignore lint/style/noRestrictedImports: conditional schema
-    await import("./routes/index.ee")
+      await import("./routes/index.ee")
     : ({} as Record<string, never>);
 
 const {
@@ -419,7 +419,8 @@ const startMetricsServer = async () => {
     host,
   });
   metricsServer.log.info(
-    `Metrics server started on port ${observability.metrics.port}${metricsSecret ? " (with authentication)" : " (no authentication)"
+    `Metrics server started on port ${observability.metrics.port}${
+      metricsSecret ? " (with authentication)" : " (no authentication)"
     }`,
   );
 };
@@ -449,7 +450,8 @@ const startMcpServerRuntime = async (
       });
     } catch (error) {
       fastify.log.error(
-        `Failed to import MCP Server Runtime: ${error instanceof Error ? error.message : "Unknown error"
+        `Failed to import MCP Server Runtime: ${
+          error instanceof Error ? error.message : "Unknown error"
         }`,
       );
       // Continue server startup even if MCP runtime fails
