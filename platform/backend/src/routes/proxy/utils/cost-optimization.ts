@@ -12,10 +12,10 @@ import type {
   Cerebras,
   Cohere,
   Gemini,
+  Minimax,
   OpenAi,
   Vllm,
   Zhipuai,
-  Minimax,
 } from "@/types";
 
 type ProviderMessages = {

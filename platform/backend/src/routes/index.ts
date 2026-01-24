@@ -6,11 +6,11 @@ import anthropicProxyRoutesV2 from "./proxy/routesv2/anthropic";
 import cerebrasProxyRoutesV2 from "./proxy/routesv2/cerebras";
 import cohereProxyRoutesV2 from "./proxy/routesv2/cohere";
 import geminiProxyRoutesV2 from "./proxy/routesv2/gemini";
+import minimaxProxyRoutesV2 from "./proxy/routesv2/minimax";
 import ollamaProxyRoutesV2 from "./proxy/routesv2/ollama";
 import openAiProxyRoutesV2 from "./proxy/routesv2/openai";
 import vllmProxyRoutesV2 from "./proxy/routesv2/vllm";
 import zhipuaiProxyRoutesV2 from "./proxy/routesv2/zhipuai";
-import minimaxProxyRoutesV2 from "./proxy/routesv2/minimax";
 
 export { default as a2aRoutes } from "./a2a";
 export { default as agentRoutes } from "./agent";
