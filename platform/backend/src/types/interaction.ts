@@ -7,11 +7,11 @@ import {
   Cerebras,
   Cohere,
   Gemini,
+  Minimax,
   Ollama,
   OpenAi,
   Vllm,
   Zhipuai,
-  Minimax,
 } from "./llm-providers";
 import { ToonSkipReasonSchema } from "./tool-result-compression";
 

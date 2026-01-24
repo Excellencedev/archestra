@@ -3,272 +3,272 @@ import type { PartialUIMessage } from "@/components/chatbot-demo";
 import type { DualLlmResult, Interaction, InteractionUtils } from "./common";
 
 class MinimaxChatCompletionInteraction implements InteractionUtils {
-    private request: archestraApiTypes.MinimaxChatCompletionRequest;
-    private response: archestraApiTypes.MinimaxChatCompletionResponse;
-    modelName: string;
+  private request: archestraApiTypes.MinimaxChatCompletionRequest;
+  private response: archestraApiTypes.MinimaxChatCompletionResponse;
+  modelName: string;
 
-    constructor(interaction: Interaction) {
-        this.request =
-            interaction.request as archestraApiTypes.MinimaxChatCompletionRequest;
-        this.response =
-            interaction.response as archestraApiTypes.MinimaxChatCompletionResponse;
-        this.modelName = interaction.model ?? this.request.model;
+  constructor(interaction: Interaction) {
+    this.request =
+      interaction.request as archestraApiTypes.MinimaxChatCompletionRequest;
+    this.response =
+      interaction.response as archestraApiTypes.MinimaxChatCompletionResponse;
+    this.modelName = interaction.model ?? this.request.model;
+  }
+
+  isLastMessageToolCall(): boolean {
+    const messages = this.request.messages;
+
+    if (messages.length === 0) {
+      return false;
     }
 
-    isLastMessageToolCall(): boolean {
-        const messages = this.request.messages;
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage.role === "tool";
+  }
 
-        if (messages.length === 0) {
-            return false;
+  getLastToolCallId(): string | null {
+    const messages = this.request.messages;
+    if (messages.length === 0) {
+      return null;
+    }
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role === "tool") {
+      return lastMessage.tool_call_id;
+    }
+    return null;
+  }
+
+  getToolNamesUsed(): string[] {
+    const toolsUsed = new Set<string>();
+    for (const message of this.request.messages) {
+      if (message.role === "assistant" && message.tool_calls) {
+        for (const toolCall of message.tool_calls) {
+          toolsUsed.add(toolCall.function.name);
+        }
+      }
+    }
+    return Array.from(toolsUsed);
+  }
+
+  getToolNamesRefused(): string[] {
+    return [];
+  }
+
+  getToolNamesRequested(): string[] {
+    const toolsRequested = new Set<string>();
+
+    for (const choice of this.response.choices) {
+      if (choice.message.tool_calls) {
+        for (const toolCall of choice.message.tool_calls) {
+          toolsRequested.add(toolCall.function.name);
+        }
+      }
+    }
+
+    return Array.from(toolsRequested);
+  }
+
+  getLastUserMessage(): string {
+    const reversedMessages = [...this.request.messages].reverse();
+    for (const message of reversedMessages) {
+      if (message.role !== "user") {
+        continue;
+      }
+      if (typeof message.content === "string") {
+        return message.content;
+      }
+      if (
+        Array.isArray(message.content) &&
+        message.content[0]?.type === "text"
+      ) {
+        return message.content[0].text;
+      }
+    }
+    return "";
+  }
+
+  getLastAssistantResponse(): string {
+    const content = this.response.choices[0]?.message?.content as string;
+    return content ?? "";
+  }
+
+  getToolRefusedCount(): number {
+    let count = 0;
+    for (const choice of this.response.choices) {
+      if (
+        choice.finish_reason === "content_filter" ||
+        choice.finish_reason === "function_call" // some providers use this when they can't call
+      ) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  private mapToUiMessage(
+    message:
+      | archestraApiTypes.MinimaxChatCompletionRequest["messages"][number]
+      | archestraApiTypes.MinimaxChatCompletionResponse["choices"][number]["message"],
+  ): PartialUIMessage {
+    const parts: PartialUIMessage["parts"] = [];
+    const { content, role } = message;
+
+    if (role === "assistant") {
+      const { tool_calls: toolCalls } = message;
+
+      if (toolCalls) {
+        if (typeof content === "string" && content) {
+          parts.push({ type: "text", text: content });
+        } else if (Array.isArray(content)) {
+          for (const part of content) {
+            if (part.type === "text") {
+              parts.push({ type: "text", text: part.text });
+            }
+          }
         }
 
-        const lastMessage = messages[messages.length - 1];
-        return lastMessage.role === "tool";
+        for (const toolCall of toolCalls) {
+          parts.push({
+            type: "dynamic-tool",
+            toolName: toolCall.function.name,
+            toolCallId: toolCall.id,
+            state: "input-available",
+            input: JSON.parse(toolCall.function.arguments),
+          });
+        }
+      } else if (typeof content === "string") {
+        parts.push({ type: "text", text: content });
+      }
+    } else if (message.role === "tool") {
+      const toolContent = message.content;
+      const toolCallId = message.tool_call_id;
+
+      let output: unknown;
+      try {
+        output =
+          typeof toolContent === "string"
+            ? JSON.parse(toolContent)
+            : toolContent;
+      } catch {
+        output = toolContent;
+      }
+
+      parts.push({
+        type: "dynamic-tool",
+        toolName: "tool-result",
+        toolCallId,
+        state: "output-available",
+        input: {},
+        output,
+      });
+    } else {
+      if (typeof content === "string") {
+        parts.push({ type: "text", text: content });
+      } else if (Array.isArray(content)) {
+        for (const part of content) {
+          if (part.type === "text") {
+            parts.push({ type: "text", text: part.text });
+          }
+        }
+      }
     }
 
-    getLastToolCallId(): string | null {
-        const messages = this.request.messages;
-        if (messages.length === 0) {
-            return null;
+    const minimaxRoleToUIMessageRoleMap: Record<
+      archestraApiTypes.MinimaxChatCompletionRequest["messages"][number]["role"],
+      PartialUIMessage["role"]
+    > = {
+      system: "system",
+      developer: "system",
+      function: "assistant",
+      tool: "assistant",
+      user: "user",
+      assistant: "assistant",
+    };
+
+    return {
+      role: minimaxRoleToUIMessageRoleMap[role],
+      parts,
+    };
+  }
+
+  private mapRequestToUiMessages(
+    dualLlmResults?: DualLlmResult[],
+  ): PartialUIMessage[] {
+    const messages = this.request.messages;
+    const uiMessages: PartialUIMessage[] = [];
+
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i];
+
+      if (msg.role === "tool") {
+        continue;
+      }
+
+      const uiMessage = this.mapToUiMessage(msg);
+
+      if (msg.role === "assistant" && "tool_calls" in msg && msg.tool_calls) {
+        const toolCallParts: PartialUIMessage["parts"] = [...uiMessage.parts];
+
+        for (const toolCall of msg.tool_calls) {
+          const toolResultMsg = messages
+            .slice(i + 1)
+            .find(
+              (m) =>
+                m.role === "tool" &&
+                "tool_call_id" in m &&
+                m.tool_call_id === toolCall.id,
+            );
+
+          if (toolResultMsg && toolResultMsg.role === "tool") {
+            const toolResultUiMsg = this.mapToUiMessage(toolResultMsg);
+            toolCallParts.push(...toolResultUiMsg.parts);
+
+            const dualLlmResultForTool = dualLlmResults?.find(
+              (result) => result.toolCallId === toolCall.id,
+            );
+
+            if (dualLlmResultForTool) {
+              const dualLlmPart = {
+                type: "dual-llm-analysis" as const,
+                toolCallId: dualLlmResultForTool.toolCallId,
+                safeResult: dualLlmResultForTool.result,
+                conversations: Array.isArray(dualLlmResultForTool.conversations)
+                  ? (dualLlmResultForTool.conversations as Array<{
+                      role: "user" | "assistant";
+                      content: string | unknown;
+                    }>)
+                  : [],
+              };
+              toolCallParts.push(dualLlmPart);
+            }
+          }
         }
 
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage.role === "tool") {
-            return lastMessage.tool_call_id;
-        }
-        return null;
+        uiMessages.push({
+          ...uiMessage,
+          parts: toolCallParts,
+        });
+      } else {
+        uiMessages.push(uiMessage);
+      }
     }
 
-    getToolNamesUsed(): string[] {
-        const toolsUsed = new Set<string>();
-        for (const message of this.request.messages) {
-            if (message.role === "assistant" && message.tool_calls) {
-                for (const toolCall of message.tool_calls) {
-                    toolsUsed.add(toolCall.function.name);
-                }
-            }
-        }
-        return Array.from(toolsUsed);
-    }
+    return uiMessages;
+  }
 
-    getToolNamesRefused(): string[] {
-        return [];
-    }
+  private mapResponseToUiMessages(): PartialUIMessage[] {
+    return this.response.choices.map((choice) =>
+      this.mapToUiMessage(choice.message),
+    );
+  }
 
-    getToolNamesRequested(): string[] {
-        const toolsRequested = new Set<string>();
-
-        for (const choice of this.response.choices) {
-            if (choice.message.tool_calls) {
-                for (const toolCall of choice.message.tool_calls) {
-                    toolsRequested.add(toolCall.function.name);
-                }
-            }
-        }
-
-        return Array.from(toolsRequested);
-    }
-
-    getLastUserMessage(): string {
-        const reversedMessages = [...this.request.messages].reverse();
-        for (const message of reversedMessages) {
-            if (message.role !== "user") {
-                continue;
-            }
-            if (typeof message.content === "string") {
-                return message.content;
-            }
-            if (
-                Array.isArray(message.content) &&
-                message.content[0]?.type === "text"
-            ) {
-                return message.content[0].text;
-            }
-        }
-        return "";
-    }
-
-    getLastAssistantResponse(): string {
-        const content = this.response.choices[0]?.message?.content as string;
-        return content ?? "";
-    }
-
-    getToolRefusedCount(): number {
-        let count = 0;
-        for (const choice of this.response.choices) {
-            if (
-                choice.finish_reason === "content_filter" ||
-                choice.finish_reason === "function_call" // some providers use this when they can't call
-            ) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    private mapToUiMessage(
-        message:
-            | archestraApiTypes.MinimaxChatCompletionRequest["messages"][number]
-            | archestraApiTypes.MinimaxChatCompletionResponse["choices"][number]["message"],
-    ): PartialUIMessage {
-        const parts: PartialUIMessage["parts"] = [];
-        const { content, role } = message;
-
-        if (role === "assistant") {
-            const { tool_calls: toolCalls } = message;
-
-            if (toolCalls) {
-                if (typeof content === "string" && content) {
-                    parts.push({ type: "text", text: content });
-                } else if (Array.isArray(content)) {
-                    for (const part of content) {
-                        if (part.type === "text") {
-                            parts.push({ type: "text", text: part.text });
-                        }
-                    }
-                }
-
-                for (const toolCall of toolCalls) {
-                    parts.push({
-                        type: "dynamic-tool",
-                        toolName: toolCall.function.name,
-                        toolCallId: toolCall.id,
-                        state: "input-available",
-                        input: JSON.parse(toolCall.function.arguments),
-                    });
-                }
-            } else if (typeof content === "string") {
-                parts.push({ type: "text", text: content });
-            }
-        } else if (message.role === "tool") {
-            const toolContent = message.content;
-            const toolCallId = message.tool_call_id;
-
-            let output: unknown;
-            try {
-                output =
-                    typeof toolContent === "string"
-                        ? JSON.parse(toolContent)
-                        : toolContent;
-            } catch {
-                output = toolContent;
-            }
-
-            parts.push({
-                type: "dynamic-tool",
-                toolName: "tool-result",
-                toolCallId,
-                state: "output-available",
-                input: {},
-                output,
-            });
-        } else {
-            if (typeof content === "string") {
-                parts.push({ type: "text", text: content });
-            } else if (Array.isArray(content)) {
-                for (const part of content) {
-                    if (part.type === "text") {
-                        parts.push({ type: "text", text: part.text });
-                    }
-                }
-            }
-        }
-
-        const minimaxRoleToUIMessageRoleMap: Record<
-            archestraApiTypes.MinimaxChatCompletionRequest["messages"][number]["role"],
-            PartialUIMessage["role"]
-        > = {
-            system: "system",
-            developer: "system",
-            function: "assistant",
-            tool: "assistant",
-            user: "user",
-            assistant: "assistant",
-        };
-
-        return {
-            role: minimaxRoleToUIMessageRoleMap[role],
-            parts,
-        };
-    }
-
-    private mapRequestToUiMessages(
-        dualLlmResults?: DualLlmResult[],
-    ): PartialUIMessage[] {
-        const messages = this.request.messages;
-        const uiMessages: PartialUIMessage[] = [];
-
-        for (let i = 0; i < messages.length; i++) {
-            const msg = messages[i];
-
-            if (msg.role === "tool") {
-                continue;
-            }
-
-            const uiMessage = this.mapToUiMessage(msg);
-
-            if (msg.role === "assistant" && "tool_calls" in msg && msg.tool_calls) {
-                const toolCallParts: PartialUIMessage["parts"] = [...uiMessage.parts];
-
-                for (const toolCall of msg.tool_calls) {
-                    const toolResultMsg = messages
-                        .slice(i + 1)
-                        .find(
-                            (m) =>
-                                m.role === "tool" &&
-                                "tool_call_id" in m &&
-                                m.tool_call_id === toolCall.id,
-                        );
-
-                    if (toolResultMsg && toolResultMsg.role === "tool") {
-                        const toolResultUiMsg = this.mapToUiMessage(toolResultMsg);
-                        toolCallParts.push(...toolResultUiMsg.parts);
-
-                        const dualLlmResultForTool = dualLlmResults?.find(
-                            (result) => result.toolCallId === toolCall.id,
-                        );
-
-                        if (dualLlmResultForTool) {
-                            const dualLlmPart = {
-                                type: "dual-llm-analysis" as const,
-                                toolCallId: dualLlmResultForTool.toolCallId,
-                                safeResult: dualLlmResultForTool.result,
-                                conversations: Array.isArray(dualLlmResultForTool.conversations)
-                                    ? (dualLlmResultForTool.conversations as Array<{
-                                        role: "user" | "assistant";
-                                        content: string | unknown;
-                                    }>)
-                                    : [],
-                            };
-                            toolCallParts.push(dualLlmPart);
-                        }
-                    }
-                }
-
-                uiMessages.push({
-                    ...uiMessage,
-                    parts: toolCallParts,
-                });
-            } else {
-                uiMessages.push(uiMessage);
-            }
-        }
-
-        return uiMessages;
-    }
-
-    private mapResponseToUiMessages(): PartialUIMessage[] {
-        return this.response.choices.map((choice) =>
-            this.mapToUiMessage(choice.message),
-        );
-    }
-
-    mapToUiMessages(dualLlmResults?: DualLlmResult[]): PartialUIMessage[] {
-        return [
-            ...this.mapRequestToUiMessages(dualLlmResults),
-            ...this.mapResponseToUiMessages(),
-        ];
-    }
+  mapToUiMessages(dualLlmResults?: DualLlmResult[]): PartialUIMessage[] {
+    return [
+      ...this.mapRequestToUiMessages(dualLlmResults),
+      ...this.mapResponseToUiMessages(),
+    ];
+  }
 }
 
 export default MinimaxChatCompletionInteraction;

@@ -7,30 +7,33 @@
 import { z } from "zod";
 
 export const FunctionDefinitionSchema = z
-    .object({
-        name: z.string(),
-        description: z.string().optional(),
-        parameters: z.record(z.string(), z.unknown()).optional().describe(`
+  .object({
+    name: z.string(),
+    description: z.string().optional(),
+    parameters: z
+      .record(z.string(), z.unknown())
+      .optional()
+      .describe(`
     The parameters the functions accepts, described as a JSON Schema object.
     Omitting parameters defines a function with an empty parameter list.
   `),
-        strict: z.boolean().nullable().optional(),
-    })
-    .describe("A function definition for tool calling");
+    strict: z.boolean().nullable().optional(),
+  })
+  .describe("A function definition for tool calling");
 
 export const ToolSchema = z
-    .object({
-        type: z.enum(["function"]),
-        function: FunctionDefinitionSchema,
-    })
-    .describe("A function tool definition");
+  .object({
+    type: z.enum(["function"]),
+    function: FunctionDefinitionSchema,
+  })
+  .describe("A function tool definition");
 
 export const ToolChoiceOptionSchema = z.union([
-    z.enum(["none", "auto", "required"]),
-    z.object({
-        type: z.enum(["function"]),
-        function: z.object({
-            name: z.string(),
-        }),
+  z.enum(["none", "auto", "required"]),
+  z.object({
+    type: z.enum(["function"]),
+    function: z.object({
+      name: z.string(),
     }),
+  }),
 ]);
