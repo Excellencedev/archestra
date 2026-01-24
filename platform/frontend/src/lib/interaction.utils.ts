@@ -13,6 +13,7 @@ import OllamaChatCompletionInteraction from "./llmProviders/ollama";
 import OpenAiChatCompletionInteraction from "./llmProviders/openai";
 import VllmChatCompletionInteraction from "./llmProviders/vllm";
 import ZhipuaiChatCompletionInteraction from "./llmProviders/zhipuai";
+import MinimaxChatCompletionInteraction from "./llmProviders/minimax";
 
 export interface CostSavingsInput {
   cost: string | null | undefined;
@@ -59,8 +60,8 @@ export function calculateCostSavings(
   // Calculate tokens saved from TOON compression
   const toonTokensSaved =
     input.toonTokensBefore &&
-    input.toonTokensAfter &&
-    input.toonTokensBefore > input.toonTokensAfter
+      input.toonTokensAfter &&
+      input.toonTokensBefore > input.toonTokensAfter
       ? input.toonTokensBefore - input.toonTokensAfter
       : null;
 
@@ -134,6 +135,8 @@ export class DynamicInteraction implements InteractionUtils {
       return new CohereChatInteraction(interaction);
     } else if (type === "gemini:generateContent") {
       return new GeminiGenerateContentInteraction(interaction);
+    } else if (type === "minimax:chatCompletions") {
+      return new MinimaxChatCompletionInteraction(interaction);
     }
     throw new Error(`Unsupported interaction type: ${type}`);
   }

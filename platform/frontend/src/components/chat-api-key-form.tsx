@@ -123,6 +123,14 @@ const PROVIDER_CONFIG: Record<
     consoleUrl: "https://z.ai/model-api",
     consoleName: "Zhipu AI Platform",
   },
+  minimax: {
+    name: "MiniMax",
+    icon: "/icons/openai.png", // Placeholder icon
+    placeholder: "...",
+    enabled: true,
+    consoleUrl: "https://www.minimaxi.com/platform",
+    consoleName: "MiniMax Platform",
+  },
 } as const;
 
 export { PROVIDER_CONFIG };

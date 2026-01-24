@@ -36,6 +36,8 @@ const featuresRoutes: FastifyPluginAsyncZod = async (fastify) => {
             vllmEnabled: z.boolean(),
             /** Ollama mode - when enabled, no API key is typically needed */
             ollamaEnabled: z.boolean(),
+            /** MiniMax mode */
+            minimaxEnabled: z.boolean(),
             /** Global tool policy - permissive bypasses policy checks, restrictive enforces them */
             globalToolPolicy: z.enum(["permissive", "restrictive"]),
             /** Browser streaming - enables live browser automation via Playwright MCP */
@@ -73,6 +75,7 @@ const featuresRoutes: FastifyPluginAsyncZod = async (fastify) => {
         geminiVertexAiEnabled: isVertexAiEnabled(),
         vllmEnabled: config.llm.vllm.enabled,
         ollamaEnabled: config.llm.ollama.enabled,
+        minimaxEnabled: config.llm.minimax.enabled,
         globalToolPolicy,
         incomingEmail: getEmailProviderInfo(),
         knowledgeGraph: getKnowledgeGraphProviderInfo(),

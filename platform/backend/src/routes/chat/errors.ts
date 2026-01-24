@@ -5,6 +5,7 @@ import {
   type ChatErrorResponse,
   GeminiErrorCodes,
   GeminiErrorReasons,
+  MinimaxErrorTypes,
   OllamaErrorTypes,
   OpenAIErrorTypes,
   RetryableErrorCodes,
@@ -84,6 +85,12 @@ interface ParsedAnthropicError {
 }
 
 interface ParsedZhipuaiError {
+  code?: string;
+  message?: string;
+}
+
+interface ParsedMinimaxError {
+  type?: string;
   code?: string;
   message?: string;
 }
@@ -183,6 +190,27 @@ function parseZhipuaiError(responseBody: string): ParsedZhipuaiError | null {
     const parsed = JSON.parse(responseBody);
     if (parsed?.error) {
       return {
+        code: parsed.error.code,
+        message: parsed.error.message,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parse MiniMax error response body.
+ * MiniMax is OpenAI-compatible, so structure is: { error: { type, code, message } }
+ * @see https://platform.minimax.io/docs/api-reference/text-openai-api
+ */
+function parseMinimaxError(responseBody: string): ParsedMinimaxError | null {
+  try {
+    const parsed = JSON.parse(responseBody);
+    if (parsed?.error) {
+      return {
+        type: parsed.error.type,
         code: parsed.error.code,
         message: parsed.error.message,
       };
@@ -356,7 +384,7 @@ function parseGeminiError(responseBody: string): ParsedGeminiError | null {
       // Details can be an array or object-like array from nested JSON parsing
       const details =
         Array.isArray(errorObj.details) ||
-        (typeof errorObj.details === "object" && errorObj.details !== null)
+          (typeof errorObj.details === "object" && errorObj.details !== null)
           ? (errorObj.details as unknown[] | Record<string, unknown>)
           : undefined;
 
@@ -366,24 +394,24 @@ function parseGeminiError(responseBody: string): ParsedGeminiError | null {
             ? errorObj.code
             : typeof parsed?.error === "object"
               ? ((parsed.error as Record<string, unknown>).code as
-                  | number
-                  | undefined)
+                | number
+                | undefined)
               : undefined,
         status:
           typeof errorObj.status === "string"
             ? errorObj.status
             : typeof parsed?.error === "object"
               ? ((parsed.error as Record<string, unknown>).status as
-                  | string
-                  | undefined)
+                | string
+                | undefined)
               : undefined,
         message:
           typeof errorObj.message === "string"
             ? errorObj.message
             : typeof parsed?.error === "object"
               ? ((parsed.error as Record<string, unknown>).message as
-                  | string
-                  | undefined)
+                | string
+                | undefined)
               : undefined,
         details: Array.isArray(details) ? details : undefined,
         // Extract ErrorInfo for specific error reason mapping
@@ -496,6 +524,47 @@ function mapOpenAIErrorToCode(
   }
 
   // Fall back to status code
+  return mapStatusCodeToErrorCode(statusCode);
+}
+
+/**
+ * Map MiniMax error to ChatErrorCode.
+ * MiniMax is OpenAI-compatible.
+ * @see https://platform.minimax.io/docs/api-reference/text-openai-api
+ */
+function mapMinimaxErrorToCode(
+  statusCode: number | undefined,
+  parsedError: ParsedMinimaxError | null,
+): ChatErrorCode {
+  const errorType = parsedError?.type;
+  const errorCode = parsedError?.code;
+
+  if (errorCode) {
+    if (errorCode === MinimaxErrorTypes.INVALID_API_KEY) {
+      return ChatErrorCode.Authentication;
+    }
+    if (errorCode === MinimaxErrorTypes.CONTEXT_LENGTH_EXCEEDED) {
+      return ChatErrorCode.ContextTooLong;
+    }
+    if (errorCode === MinimaxErrorTypes.MODEL_NOT_FOUND) {
+      return ChatErrorCode.NotFound;
+    }
+  }
+
+  if (errorType) {
+    switch (errorType) {
+      case MinimaxErrorTypes.AUTHENTICATION:
+        return ChatErrorCode.Authentication;
+      case MinimaxErrorTypes.SERVER_ERROR:
+      case MinimaxErrorTypes.SERVICE_UNAVAILABLE:
+        return ChatErrorCode.ServerError;
+      case MinimaxErrorTypes.NOT_FOUND:
+        return ChatErrorCode.NotFound;
+      case MinimaxErrorTypes.INVALID_REQUEST:
+        return ChatErrorCode.InvalidRequest;
+    }
+  }
+
   return mapStatusCodeToErrorCode(statusCode);
 }
 
@@ -756,7 +825,8 @@ type ParsedProviderError =
   | ParsedAnthropicError
   | ParsedGeminiError
   | ParsedCohereError
-  | ParsedZhipuaiError;
+  | ParsedZhipuaiError
+  | ParsedMinimaxError;
 
 type ErrorParser = (responseBody: string) => ParsedProviderError | null;
 type ErrorMapper = (
@@ -814,6 +884,16 @@ function mapZhipuaiErrorWrapper(
   return mapZhipuaiErrorToCode(
     statusCode,
     parsedError as ParsedZhipuaiError | null,
+  );
+}
+
+function mapMinimaxErrorWrapper(
+  statusCode: number | undefined,
+  parsedError: ParsedProviderError | null,
+): ChatErrorCode {
+  return mapMinimaxErrorToCode(
+    statusCode,
+    parsedError as ParsedMinimaxError | null,
   );
 }
 
@@ -977,6 +1057,7 @@ const providerParsers: Record<SupportedProvider, ErrorParser> = {
   vllm: parseVllmError,
   ollama: parseOllamaError,
   zhipuai: parseZhipuaiError,
+  minimax: parseMinimaxError,
 };
 
 /**
@@ -993,6 +1074,7 @@ const providerMappers: Record<SupportedProvider, ErrorMapper> = {
   vllm: mapVllmErrorWrapper,
   ollama: mapOllamaErrorWrapper,
   zhipuai: mapZhipuaiErrorWrapper,
+  minimax: mapMinimaxErrorWrapper,
 };
 
 // =============================================================================
@@ -1156,9 +1238,9 @@ export function mapProviderError(
         ...mappedLastError,
         originalError: mappedLastError.originalError
           ? {
-              ...mappedLastError.originalError,
-              message: `Failed after ${retryError.errors?.length || "multiple"} attempts. Last error: ${originalMessage}`,
-            }
+            ...mappedLastError.originalError,
+            message: `Failed after ${retryError.errors?.length || "multiple"} attempts. Last error: ${originalMessage}`,
+          }
           : undefined,
       };
     }

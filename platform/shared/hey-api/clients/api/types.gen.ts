@@ -4407,6 +4407,66 @@ export type CerebrasChatCompletionRequest = {
     stream?: boolean | unknown;
 };
 
+export type MinimaxChatCompletionRequest = {
+    model: string;
+    messages: Array<{
+        content: string;
+        role: 'system' | 'user' | 'assistant' | 'tool';
+        name?: string;
+        tool_call_id?: string;
+        tool_calls?: Array<{
+            id: string;
+            type: 'function';
+            function: {
+                name: string;
+                arguments: string;
+            };
+        }>;
+    }>;
+    tools?: Array<{
+        type: 'function';
+        function: {
+            name: string;
+            description?: string;
+            parameters?: {
+                [key: string]: unknown;
+            };
+        };
+    }>;
+    tool_choice?: string | unknown;
+    temperature?: number | unknown;
+    max_tokens?: number | unknown;
+    stream?: boolean | unknown;
+};
+
+export type MinimaxChatCompletionResponse = {
+    id: string;
+    choices: Array<{
+        finish_reason: 'stop' | 'length' | 'tool_calls' | 'content_filter';
+        index: number;
+        message: {
+            content: string | null;
+            role: 'assistant';
+            tool_calls?: Array<{
+                id: string;
+                type: 'function';
+                function: {
+                    arguments: string;
+                    name: string;
+                };
+            }>;
+        };
+    }>;
+    created: number;
+    model: string;
+    object: 'chat.completion';
+    usage?: {
+        completion_tokens: number;
+        prompt_tokens: number;
+        total_tokens: number;
+    };
+};
+
 export type CerebrasChatCompletionResponse = {
     id: string;
     choices: Array<{
@@ -7282,6 +7342,50 @@ export type AssignToolToAgentErrors = {
         };
     };
 };
+
+export type MinimaxChatCompletionsWithAgentData = {
+    body?: MinimaxChatCompletionRequest;
+    path: {
+        agentId: string;
+    };
+    query?: never;
+    url: '/v1/minimax/{agentId}/chat/completions';
+};
+
+export type MinimaxChatCompletionsWithAgentErrors = {
+    /**
+     * Default Response
+     */
+    default: {
+        error: {
+            message: string;
+            type: string;
+        };
+    };
+};
+
+export type MinimaxChatCompletionsWithAgentResponse = MinimaxChatCompletionResponse;
+
+export type MinimaxChatCompletionsWithDefaultAgentData = {
+    body?: MinimaxChatCompletionRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/minimax/chat/completions';
+};
+
+export type MinimaxChatCompletionsWithDefaultAgentErrors = {
+    /**
+     * Default Response
+     */
+    default: {
+        error: {
+            message: string;
+            type: string;
+        };
+    };
+};
+
+export type MinimaxChatCompletionsWithDefaultAgentResponse = MinimaxChatCompletionResponse;
 
 export type AssignToolToAgentError = AssignToolToAgentErrors[keyof AssignToolToAgentErrors];
 

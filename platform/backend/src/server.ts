@@ -60,6 +60,7 @@ import {
   Cerebras,
   Cohere,
   Gemini,
+  Minimax,
   Ollama,
   OpenAi,
   Vllm,
@@ -77,7 +78,7 @@ const SHUTDOWN_CLEANUP_TIMEOUT_MS = 3000;
 const eeRoutes =
   config.enterpriseLicenseActivated || config.codegenMode
     ? // biome-ignore lint/style/noRestrictedImports: conditional schema
-      await import("./routes/index.ee")
+    await import("./routes/index.ee")
     : ({} as Record<string, never>);
 
 const {
@@ -144,6 +145,12 @@ export function registerOpenApiSchemas() {
   });
   z.globalRegistry.add(Zhipuai.API.ChatCompletionResponseSchema, {
     id: "ZhipuaiChatCompletionResponse",
+  });
+  z.globalRegistry.add(Minimax.API.ChatCompletionRequestSchema, {
+    id: "MinimaxChatCompletionRequest",
+  });
+  z.globalRegistry.add(Minimax.API.ChatCompletionResponseSchema, {
+    id: "MinimaxChatCompletionResponse",
   });
   z.globalRegistry.add(WebSocketMessageSchema, {
     id: "WebSocketMessage",
@@ -412,8 +419,7 @@ const startMetricsServer = async () => {
     host,
   });
   metricsServer.log.info(
-    `Metrics server started on port ${observability.metrics.port}${
-      metricsSecret ? " (with authentication)" : " (no authentication)"
+    `Metrics server started on port ${observability.metrics.port}${metricsSecret ? " (with authentication)" : " (no authentication)"
     }`,
   );
 };
@@ -443,8 +449,7 @@ const startMcpServerRuntime = async (
       });
     } catch (error) {
       fastify.log.error(
-        `Failed to import MCP Server Runtime: ${
-          error instanceof Error ? error.message : "Unknown error"
+        `Failed to import MCP Server Runtime: ${error instanceof Error ? error.message : "Unknown error"
         }`,
       );
       // Continue server startup even if MCP runtime fails

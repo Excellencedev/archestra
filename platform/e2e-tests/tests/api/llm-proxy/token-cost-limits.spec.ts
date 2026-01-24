@@ -246,6 +246,35 @@ const cohereConfig: TokenCostLimitTestConfig = {
   },
 };
 
+const minimaxConfig: TokenCostLimitTestConfig = {
+  providerName: "Minimax",
+
+  endpoint: (profileId) => `/v1/minimax/${profileId}/chat/completions`,
+
+  headers: (wiremockStub) => ({
+    Authorization: `Bearer ${wiremockStub}`,
+    "Content-Type": "application/json",
+  }),
+
+  buildRequest: (content) => ({
+    model: "test-minimax-cost-limit",
+    messages: [{ role: "user", content }],
+  }),
+
+  modelName: "test-minimax-cost-limit",
+
+  // Typical OpenAI-style mock response tokens: 100/20
+  // Cost = (100 * 20000 + 20 * 30000) / 1,000,000 = $2.60
+  tokenPrice: {
+    provider: "minimax",
+    model: "test-minimax-cost-limit",
+    pricePerMillionInput: "20000.00",
+    pricePerMillionOutput: "30000.00",
+  },
+};
+
+
+
 // =============================================================================
 // Test Suite
 // =============================================================================
@@ -259,7 +288,9 @@ const testConfigs: TokenCostLimitTestConfig[] = [
   vllmConfig,
   ollamaConfig,
   zhipuaiConfig,
+  minimaxConfig,
 ];
+
 
 for (const config of testConfigs) {
   test.describe(`LLMProxy-TokenCostLimits-${config.providerName}`, () => {
@@ -288,7 +319,7 @@ for (const config of testConfigs) {
             p.model === config.tokenPrice.model,
         );
         if (existingPrice) {
-          await deleteTokenPrice(request, existingPrice.id).catch(() => {});
+          await deleteTokenPrice(request, existingPrice.id).catch(() => { });
         }
       }
 
@@ -466,15 +497,15 @@ for (const config of testConfigs) {
     test.afterEach(
       async ({ request, deleteLimit, deleteAgent, deleteTokenPrice }) => {
         if (limitId) {
-          await deleteLimit(request, limitId).catch(() => {});
+          await deleteLimit(request, limitId).catch(() => { });
           limitId = "";
         }
         if (profileId) {
-          await deleteAgent(request, profileId).catch(() => {});
+          await deleteAgent(request, profileId).catch(() => { });
           profileId = "";
         }
         if (tokenPriceId) {
-          await deleteTokenPrice(request, tokenPriceId).catch(() => {});
+          await deleteTokenPrice(request, tokenPriceId).catch(() => { });
           tokenPriceId = "";
         }
       },

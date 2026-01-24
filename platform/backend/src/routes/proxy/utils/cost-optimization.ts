@@ -15,6 +15,7 @@ import type {
   OpenAi,
   Vllm,
   Zhipuai,
+  Minimax,
 } from "@/types";
 
 type ProviderMessages = {
@@ -26,6 +27,7 @@ type ProviderMessages = {
   vllm: Vllm.Types.ChatCompletionsRequest["messages"];
   ollama: Vllm.Types.ChatCompletionsRequest["messages"];
   zhipuai: Zhipuai.Types.ChatCompletionsRequest["messages"];
+  minimax: Minimax.Types.ChatCompletionsRequest["messages"];
 };
 
 /**

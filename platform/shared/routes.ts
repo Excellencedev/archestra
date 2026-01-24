@@ -175,6 +175,10 @@ export const RouteId = {
   ZhipuaiChatCompletionsWithDefaultAgent:
     "zhipuaiChatCompletionsWithDefaultAgent",
   ZhipuaiChatCompletionsWithAgent: "zhipuaiChatCompletionsWithAgent",
+  // Proxy Routes - MiniMax
+  MinimaxChatCompletionsWithDefaultAgent:
+    "minimaxChatCompletionsWithDefaultAgent",
+  MinimaxChatCompletionsWithAgent: "minimaxChatCompletionsWithAgent",
 
   // Chat Routes
   StreamChat: "streamChat",

@@ -1,0 +1,38 @@
+{
+    "request": {
+        "method": "POST",
+        "urlPath": "/minimax/v1/chat/completions",
+        "headers": {
+            "Authorization": {
+                "contains": "minimax-allows-archestra-untrusted-context"
+            }
+        }
+    },
+    "response": {
+        "status": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "jsonBody": {
+            "id": "chatcmpl-untrusted-ok",
+            "object": "chat.completion",
+            "created": 1234567890,
+            "model": "abab6.5s-chat",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {
+                        "role": "assistant",
+                        "content": "I am responding despite the untrusted context."
+                    },
+                    "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 100,
+                "completion_tokens": 10,
+                "total_tokens": 110
+            }
+        }
+    }
+}

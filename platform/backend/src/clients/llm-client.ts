@@ -60,6 +60,9 @@ export function detectProviderFromModel(model: string): SupportedChatProvider {
   if (lowerModel.includes("glm") || lowerModel.includes("chatglm")) {
     return "zhipuai";
   }
+  if (lowerModel.includes("minimax")) {
+    return "minimax";
+  }
 
   // Default to anthropic for backwards compatibility
   // Note: vLLM and Ollama cannot be auto-detected as they can serve any model
@@ -102,6 +105,7 @@ export async function resolveProviderApiKey(params: {
       secret?.secret?.geminiApiKey ??
       secret?.secret?.openaiApiKey ??
       secret?.secret?.zhipuaiApiKey ??
+      secret?.secret?.minimaxApiKey ??
       secret?.secret?.cohereApiKey;
     if (secretValue) {
       providerApiKey = secretValue as string;
@@ -133,6 +137,9 @@ export async function resolveProviderApiKey(params: {
       providerApiKey = config.chat.ollama.apiKey;
     } else if (provider === "zhipuai" && config.chat.zhipuai.apiKey) {
       providerApiKey = config.chat.zhipuai.apiKey;
+      apiKeySource = "environment";
+    } else if (provider === "minimax" && config.chat.minimax.apiKey) {
+      providerApiKey = config.chat.minimax.apiKey;
       apiKeySource = "environment";
     }
   }
@@ -277,6 +284,17 @@ export function createLLMModel(params: {
     const client = createOpenAI({
       apiKey,
       baseURL: `http://localhost:${config.api.port}/v1/zhipuai/${agentId}`,
+      headers,
+    });
+    return client.chat(modelName);
+  }
+
+  if (provider === "minimax") {
+    // URL format: /v1/minimax/:agentId (SDK appends /chat/completions)
+    // MiniMax is OpenAI-compatible, so we use the OpenAI SDK with custom baseURL
+    const client = createOpenAI({
+      apiKey,
+      baseURL: `http://localhost:${config.api.port}/v1/minimax/${agentId}`,
       headers,
     });
     return client.chat(modelName);

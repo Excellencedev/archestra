@@ -255,3 +255,35 @@ See the [Vertex AI authentication guide](https://cloud.google.com/vertex-ai/docs
 - **API Key format**: Obtain your API key from the [Zhipu AI Platform](https://z.ai/)
 - **Free tier available**: The GLM-4.5-Flash model is available on the free tier for testing and development
 - **Chinese language support**: GLM models excel at Chinese language understanding and generation, while maintaining strong English capabilities
+
+## MiniMax
+
+[MiniMax](https://www.minimaxi.com/) is a leading AI company in China offering advanced large language models with strong multimodal capabilities. Their API is OpenAI-compatible, making it easy to integrate into existing workflows.
+
+### Supported MiniMax APIs
+
+- **Chat Completions API** (`/chat/completions`) - ✅ Fully supported (OpenAI-compatible)
+
+### MiniMax Connection Details
+
+- **Base URL**: `http://localhost:9000/v1/minimax/{profile-id}`
+- **Authentication**: Pass your MiniMax API key in the `Authorization` header as `Bearer <your-api-key>`
+
+### Environment Variables
+
+| Variable                          | Required | Description                                                                    |
+| --------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `ARCHESTRA_MINIMAX_BASE_URL`      | No       | MiniMax API base URL (default: `https://api.minimax.io/v1`)                    |
+| `ARCHESTRA_CHAT_MINIMAX_API_KEY`  | No       | Default API key for MiniMax (can be overridden per conversation/team/org)      |
+
+### Popular Models
+
+- **abab6.5s-chat** - Optimized for speed and proficiency in complex tasks
+- **abab6.5t-chat** - High-performance model for advanced reasoning
+- **abab6.5g-chat** - Specialized in creative writing and long-form content
+
+### Important Notes
+
+- **OpenAI-compatible API**: MiniMax's API follows the OpenAI Chat Completions format, allowing for seamless transition from other providers
+- **High Concurrency**: MiniMax models are designed for high-concurrency enterprise use cases
+- **Multimodal Support**: MiniMax provides advanced capabilities in text, speech, and video generation

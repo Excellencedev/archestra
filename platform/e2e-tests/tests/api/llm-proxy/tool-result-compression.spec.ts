@@ -359,6 +359,46 @@ const zhipuaiConfig: CompressionTestConfig = {
   }),
 };
 
+
+const minimaxConfig: CompressionTestConfig = {
+  providerName: "Minimax",
+
+  endpoint: (profileId) => `/v1/minimax/${profileId}/chat/completions`,
+
+  headers: (wiremockStub) => ({
+    Authorization: `Bearer ${wiremockStub}`,
+    "Content-Type": "application/json",
+  }),
+
+  // MiniMax format: same as OpenAI (tool results as separate "tool" role messages)
+  buildRequestWithToolResult: () => ({
+    model: "abab6.5s-chat",
+    messages: [
+      { role: "user", content: "What files are in the current directory?" },
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [
+          {
+            id: "call_123",
+            type: "function",
+            function: {
+              name: "list_files",
+              arguments: '{"directory": "."}',
+            },
+          },
+        ],
+      },
+      {
+        role: "tool",
+        tool_call_id: "call_123",
+        content: JSON.stringify(TOOL_RESULT_DATA),
+      },
+    ],
+  }),
+};
+
+
 // =============================================================================
 // Test Suite
 // =============================================================================
@@ -372,7 +412,9 @@ const testConfigs: CompressionTestConfig[] = [
   vllmConfig,
   ollamaConfig,
   zhipuaiConfig,
+  minimaxConfig,
 ];
+
 
 for (const config of testConfigs) {
   test.describe(`LLMProxy-ToolResultCompression-${config.providerName}`, () => {
@@ -466,11 +508,11 @@ for (const config of testConfigs) {
       await updateOrganization(request, {
         convertToolResultsToToon: originalCompressionEnabled,
         compressionScope: originalCompressionScope,
-      }).catch(() => {});
+      }).catch(() => { });
 
       // Clean up test profile
       if (profileId) {
-        await deleteAgent(request, profileId).catch(() => {});
+        await deleteAgent(request, profileId).catch(() => { });
         profileId = "";
       }
     });

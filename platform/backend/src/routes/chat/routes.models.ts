@@ -464,6 +464,44 @@ async function fetchZhipuaiModels(apiKey: string): Promise<ModelInfo[]> {
 }
 
 /**
+ * Fetch models from MiniMax API
+ */
+async function fetchMinimaxModels(apiKey: string): Promise<ModelInfo[]> {
+  const baseUrl = config.llm.minimax.baseUrl;
+  const url = `${baseUrl}/models`;
+
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    logger.error(
+      { status: response.status, error: errorText },
+      "Failed to fetch MiniMax models",
+    );
+    throw new Error(`Failed to fetch MiniMax models: ${response.status}`);
+  }
+
+  const data = (await response.json()) as {
+    data: Array<{
+      id: string;
+      created: number;
+      owned_by: string;
+    }>;
+  };
+
+  return data.data.map((model) => ({
+    id: model.id,
+    displayName: model.id,
+    provider: "minimax" as const,
+    createdAt: new Date(model.created * 1000).toISOString(),
+  }));
+}
+
+/**
  * Fetch models from Gemini API via Vertex AI SDK
  * Uses Application Default Credentials (ADC) for authentication
  *
@@ -601,6 +639,8 @@ async function getProviderApiKey({
       return config.chat.ollama.apiKey || "";
     case "zhipuai":
       return config.chat.zhipuai?.apiKey || null;
+    case "minimax":
+      return config.chat.minimax?.apiKey || null;
     default:
       return null;
   }
@@ -619,6 +659,7 @@ const modelFetchers: Record<
   ollama: fetchOllamaModels,
   cohere: fetchCohereModels,
   zhipuai: fetchZhipuaiModels,
+  minimax: fetchMinimaxModels,
 };
 
 /**
@@ -689,6 +730,10 @@ export async function fetchModelsForProvider({
       // Ollama doesn't require API key, pass empty or configured key
       models = await modelFetchers[provider](apiKey || "EMPTY");
     } else if (provider === "zhipuai") {
+      if (apiKey) {
+        models = await modelFetchers[provider](apiKey);
+      }
+    } else if (provider === "minimax") {
       if (apiKey) {
         models = await modelFetchers[provider](apiKey);
       }
