@@ -168,7 +168,11 @@ const geminiConfig: ModelOptimizationTestConfig = {
   getModelFromResponse: (response) => response.modelVersion,
 };
 
-  provider: SupportedProvider;
+const mistralConfig: ModelOptimizationTestConfig = {
+  providerName: "Mistral",
+  provider: "mistral",
+
+  endpoint: (agentId) => `/v1/mistral/${agentId}/chat/completions`,
 
   headers: (wiremockStub) => ({
     Authorization: `Bearer ${wiremockStub}`,
@@ -177,7 +181,7 @@ const geminiConfig: ModelOptimizationTestConfig = {
 
   buildRequest: (content, tools) => {
     const request: Record<string, unknown> = {
-  provider: SupportedProvider;
+      model: "e2e-test-mistral-baseline",
       messages: [{ role: "user", content }],
     };
     if (tools && tools.length > 0) {
@@ -193,7 +197,8 @@ const geminiConfig: ModelOptimizationTestConfig = {
     return request;
   },
 
-  provider: SupportedProvider;
+  baselineModel: "e2e-test-mistral-baseline",
+  optimizedModel: "e2e-test-mistral-optimized",
 
   getModelFromResponse: (response) => response.model,
 };
@@ -226,7 +231,7 @@ const testConfigs: ModelOptimizationTestConfig[] = [
   openaiConfig,
   anthropicConfig,
   geminiConfig,
-  provider: SupportedProvider;
+  mistralConfig,
 ];
 
 test.describe("LLMProxy-ModelOptimization", () => {
