@@ -314,7 +314,7 @@ for (const config of testConfigs) {
             p.model === config.tokenPrice.model,
         );
         if (existingPrice) {
-          await deleteTokenPrice(request, existingPrice.id).catch(() => { });
+          await deleteTokenPrice(request, existingPrice.id).catch(() => {});
         }
       }
 
@@ -492,15 +492,15 @@ for (const config of testConfigs) {
     test.afterEach(
       async ({ request, deleteLimit, deleteAgent, deleteTokenPrice }) => {
         if (limitId) {
-          await deleteLimit(request, limitId).catch(() => { });
+          await deleteLimit(request, limitId).catch(() => {});
           limitId = "";
         }
         if (profileId) {
-          await deleteAgent(request, profileId).catch(() => { });
+          await deleteAgent(request, profileId).catch(() => {});
           profileId = "";
         }
         if (tokenPriceId) {
-          await deleteTokenPrice(request, tokenPriceId).catch(() => { });
+          await deleteTokenPrice(request, tokenPriceId).catch(() => {});
           tokenPriceId = "";
         }
       },

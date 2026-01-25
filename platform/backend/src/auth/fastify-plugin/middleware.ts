@@ -1,13 +1,12 @@
 import * as Sentry from "@sentry/node";
 import { type RouteId, SupportedProviders } from "@shared";
+import { requiredEndpointPermissionsMap } from "@shared/access-control";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { betterAuth, hasPermission } from "@/auth";
 import config from "@/config";
 import logger from "@/logging";
 import { UserModel } from "@/models";
 import { ApiError } from "@/types";
-
-import { requiredEndpointPermissionsMap } from "@shared/access-control";
 
 export class Authnz {
   public handle = async (request: FastifyRequest, _reply: FastifyReply) => {

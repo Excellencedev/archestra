@@ -1,14 +1,12 @@
-import { pathToFileURL } from "node:url";
-import { createClient, defineConfig } from "@hey-api/openapi-ts";
-import { MCP_CATALOG_API_BASE_URL } from "../consts";
-
+import path from "node:path";
 /**
  * During `pnpm codegen` (CODEGEN=true), use the generated docs/openapi.json file
  * which includes all enterprise routes regardless of local .env settings.
  * For manual regeneration with a running dev server, use localhost.
  */
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createClient, defineConfig } from "@hey-api/openapi-ts";
+import { MCP_CATALOG_API_BASE_URL } from "../consts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

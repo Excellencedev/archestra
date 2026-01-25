@@ -72,9 +72,7 @@ export abstract class BaseTokenizer implements Tokenizer {
             acc += block.text;
           }
           return acc;
-        },
-          "",
-        );
+        }, "");
 
         return text;
       }
