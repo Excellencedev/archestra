@@ -17,10 +17,9 @@ import type {
   LLMStreamAdapter,
   Mistral,
   StreamAccumulatorState,
-  ToonCompressionResult,
   UsageView,
 } from "@/types";
-import type { CompressionStats } from "../utils/toon-conversion";
+import type { ToolCompressionStats } from "../utils/toon-conversion";
 import { unwrapToolContent } from "../utils/unwrap-tool-content";
 
 // =============================================================================
@@ -38,8 +37,7 @@ type MistralStreamChunk = Mistral.Types.ChatCompletionChunk;
 // =============================================================================
 
 class MistralRequestAdapter
-  implements LLMRequestAdapter<MistralRequest, MistralMessages>
-{
+  implements LLMRequestAdapter<MistralRequest, MistralMessages> {
   readonly provider = "mistral" as const;
   private request: MistralRequest;
   private modifiedModel: string | null = null;
@@ -134,18 +132,14 @@ class MistralRequestAdapter
     Object.assign(this.toolResultUpdates, updates);
   }
 
-  async applyToonCompression(model: string): Promise<ToonCompressionResult> {
+  async applyToonCompression(model: string): Promise<ToolCompressionStats> {
     const { messages: compressedMessages, stats } =
       await convertToolResultsToToon(this.request.messages, model);
     this.request = {
       ...this.request,
       messages: compressedMessages,
     };
-    return {
-      tokensBefore: stats.toonTokensBefore,
-      tokensAfter: stats.toonTokensAfter,
-      costSavings: stats.toonCostSavings,
-    };
+    return stats;
   }
 
   convertToolResultContent(messages: MistralMessages): MistralMessages {
@@ -338,8 +332,7 @@ class MistralResponseAdapter implements LLMResponseAdapter<MistralResponse> {
 // =============================================================================
 
 class MistralStreamAdapter
-  implements LLMStreamAdapter<MistralStreamChunk, MistralResponse>
-{
+  implements LLMStreamAdapter<MistralStreamChunk, MistralResponse> {
   readonly provider = "mistral" as const;
   readonly state: StreamAccumulatorState;
   private currentToolCallIndices = new Map<number, number>();
@@ -518,13 +511,13 @@ class MistralStreamAdapter
     const toolCalls =
       this.state.toolCalls.length > 0
         ? this.state.toolCalls.map((tc) => ({
-            id: tc.id,
-            type: "function" as const,
-            function: {
-              name: tc.name,
-              arguments: tc.arguments,
-            },
-          }))
+          id: tc.id,
+          type: "function" as const,
+          function: {
+            name: tc.name,
+            arguments: tc.arguments,
+          },
+        }))
         : undefined;
 
     return {
@@ -564,7 +557,7 @@ async function convertToolResultsToToon(
   model: string,
 ): Promise<{
   messages: MistralMessages;
-  stats: CompressionStats;
+  stats: ToolCompressionStats;
 }> {
   const tokenizer = getTokenizer("mistral");
   let toolResultCount = 0;
@@ -620,9 +613,11 @@ async function convertToolResultsToToon(
   return {
     messages: result,
     stats: {
-      toonTokensBefore: toolResultCount > 0 ? totalTokensBefore : null,
-      toonTokensAfter: toolResultCount > 0 ? totalTokensAfter : null,
-      toonCostSavings,
+      tokensBefore: totalTokensBefore,
+      tokensAfter: totalTokensAfter,
+      costSavings: toonCostSavings ?? 0,
+      wasEffective: totalTokensAfter < totalTokensBefore,
+      hadToolResults: toolResultCount > 0,
     },
   };
 }
