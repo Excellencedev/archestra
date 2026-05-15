@@ -3,15 +3,20 @@ import db, { schema } from "@/database";
 import logger from "@/logging";
 
 class SiteNotificationModel {
-  static async getById(id: string) {
+  static async getById(id: string, organizationId: string) {
     logger.debug(
-      { id },
+      { id, organizationId },
       "SiteNotificationModel.getById: fetching notification",
     );
     const [notification] = await db
       .select()
       .from(schema.siteNotificationsTable)
-      .where(eq(schema.siteNotificationsTable.id, id))
+      .where(
+        and(
+          eq(schema.siteNotificationsTable.id, id),
+          eq(schema.siteNotificationsTable.organizationId, organizationId),
+        ),
+      )
       .limit(1);
     return notification;
   }
@@ -68,6 +73,7 @@ class SiteNotificationModel {
 
   static async update(
     id: string,
+    organizationId: string,
     data: {
       content?: string;
       expiresAt?: Date | null;
@@ -75,7 +81,7 @@ class SiteNotificationModel {
     },
   ) {
     logger.debug(
-      { id, data },
+      { id, organizationId, data },
       "SiteNotificationModel.update: updating notification",
     );
     const now = new Date();
@@ -85,16 +91,29 @@ class SiteNotificationModel {
         ...data,
         updatedAt: now,
       })
-      .where(eq(schema.siteNotificationsTable.id, id))
+      .where(
+        and(
+          eq(schema.siteNotificationsTable.id, id),
+          eq(schema.siteNotificationsTable.organizationId, organizationId),
+        ),
+      )
       .returning();
     return notification;
   }
 
-  static async delete(id: string) {
-    logger.debug({ id }, "SiteNotificationModel.delete: deleting notification");
+  static async delete(id: string, organizationId: string) {
+    logger.debug(
+      { id, organizationId },
+      "SiteNotificationModel.delete: deleting notification",
+    );
     const result = await db
       .delete(schema.siteNotificationsTable)
-      .where(eq(schema.siteNotificationsTable.id, id));
+      .where(
+        and(
+          eq(schema.siteNotificationsTable.id, id),
+          eq(schema.siteNotificationsTable.organizationId, organizationId),
+        ),
+      );
     return result;
   }
 
