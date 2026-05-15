@@ -120,25 +120,37 @@ const routes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
-      const { id } = request.params;
-
-      const existing = await SiteNotificationModel.getById(id);
-      if (!existing) {
-        return reply
-          .status(404)
-          .send({ error: { message: "Notification not found" } });
+      const organizationId = request.organizationId;
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
       }
 
-      const notification = await SiteNotificationModel.update(id, {
-        content: request.body.content,
-        expiresAt:
-          request.body.expiresAt !== undefined
-            ? request.body.expiresAt
-              ? new Date(request.body.expiresAt)
-              : null
-            : undefined,
-        isActive: request.body.isActive,
-      });
+      const { id } = request.params;
+
+      const existing = await SiteNotificationModel.getById(id, organizationId);
+      if (!existing) {
+        return reply.status(404).send({
+          error: {
+            message: "Notification not found",
+            type: "api_not_found_error",
+          },
+        });
+      }
+
+      const notification = await SiteNotificationModel.update(
+        id,
+        organizationId,
+        {
+          content: request.body.content,
+          expiresAt:
+            request.body.expiresAt !== undefined
+              ? request.body.expiresAt
+                ? new Date(request.body.expiresAt)
+                : null
+              : undefined,
+          isActive: request.body.isActive,
+        },
+      );
 
       return reply.send({
         id: notification?.id ?? "",
@@ -164,8 +176,13 @@ const routes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => {
+      const organizationId = request.organizationId;
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+
       const { id } = request.params;
-      await SiteNotificationModel.delete(id);
+      await SiteNotificationModel.delete(id, organizationId);
       return reply.send({});
     },
   );
