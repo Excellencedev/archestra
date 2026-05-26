@@ -10,9 +10,9 @@
     "prepare": "cd .. && husky platform/.husky || true",
     "ci:check": "turbo check:ci",
     "commit:check": "turbo check:commit",
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "start": "turbo start",
+    "dev": "node init && turbo dev",
+    "build": "node init && turbo build",
+    "start": "node init && turbo start",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
     "lint:fix:unsafe": "turbo lint:fix:unsafe",
@@ -33,9 +33,9 @@
     "db:studio": "turbo db:studio",
     "db:seed:mock-data": "turbo db:seed:mock-data",
     "cleanup:dev:k8s": "kubectl delete namespace archestra-dev",
-    "dev:stack:up": "scripts/dev-stack.sh up",
-    "dev:stack:down": "scripts/dev-stack.sh down",
-    "dev:stack:hydrate": "scripts/dev-stack.sh hydrate"
+    "dev:stack:up": "node init && scripts/dev-stack.sh up",
+    "dev:stack:down": "node init && scripts/dev-stack.sh down",
+    "dev:stack:hydrate": "node init && scripts/dev-stack.sh hydrate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.6",
