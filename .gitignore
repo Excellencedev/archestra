@@ -28,3 +28,5 @@ __pycache__/
 
 docs/superpowers/plans
 
+config.bat
+node_modules
